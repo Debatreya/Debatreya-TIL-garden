@@ -8,7 +8,7 @@ id: "TIL-001"
 related_projects: ["portfolio-os"]
 related_tils: []
 system_manifest: "debatreyadas.dev-v1"
-contributor_avatars: ["/avatars/debatreya.png"]
+contributor_avatars: ["/avatars/debatreya.jpg"]
 ---
 
 ## The Vision
