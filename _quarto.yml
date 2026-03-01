@@ -1,0 +1,12 @@
+project:
+  type: default
+  output-dir: _output
+
+format:
+  html:
+    theme: dark
+    # Native Math support for your coursework (PRAM, etc.)
+    math: katex 
+    # Metadata used by Antigravity to render the "Developer OS" UI
+    code-copy: true
+    code-line-numbers: true

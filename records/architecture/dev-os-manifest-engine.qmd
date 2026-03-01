@@ -1,0 +1,26 @@
+---
+title: "Engineering the Manifest-Driven Architecture"
+date: 2026-03-01
+category: "Architecture"
+tags: ["#nextjs", "#system-design"]
+read_time: "5 min"
+id: "TIL-001"
+related_projects: ["portfolio-os"]
+related_tils: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars: ["/avatars/debatreya.png"]
+---
+
+## The Vision
+The core of **debatreyadas.dev** is a decoupled sync engine. [cite_start]Instead of a static site, it acts as a consumer of external manifests [cite: 1-15].
+
+### Math & Performance
+We can define the sync efficiency using standard notation:
+$$Efficiency = \frac{Total\_Repos}{Manifest\_Hits}$$
+
+```typescript
+// Antigravity's UI will use this code-block for the 'Source' window
+export const syncEngine = async (id: string) => {
+  const data = await fetchGitHubAPI(`/repos/${id}/contents/.debatreya`);
+  return data.json();
+}
