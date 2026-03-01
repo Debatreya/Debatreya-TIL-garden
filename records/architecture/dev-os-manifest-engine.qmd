@@ -1,26 +1,96 @@
 ---
-title: "Engineering the Manifest-Driven Architecture"
-date: 2026-03-01
+title: "Building an Automated, Manifest-Driven Portfolio Sync Engine"
+date: 2026-03-02
 category: "Architecture"
-tags: ["#nextjs", "#system-design"]
-read_time: "5 min"
+tags: ["#nextjs", "#github-api", "#automation", "#software-design"]
+read_time: "7 min"
+# --- KNOWLEDGE GRAPH METADATA ---
 id: "TIL-001"
-related_projects: ["portfolio-os"]
-related_tils: []
+related_tils: [] 
+related_projects: ["portfolio-os"] 
 system_manifest: "debatreyadas.dev-v1"
-contributor_avatars: ["/avatars/debatreya.png"]
+contributor_avatars: ["/avatars/debatreya.jpg"]
 ---
 
-## The Vision
-The core of **debatreyadas.dev** is a decoupled sync engine. [cite_start]Instead of a static site, it acts as a consumer of external manifests [cite: 1-15].
+## The Vision: Zero-Maintenance Showcase
 
-### Math & Performance
-We can define the sync efficiency using standard notation:
-$$Efficiency = \frac{Total\_Repos}{Manifest\_Hits}$$
+The goal of **debatreyadas.dev** was to build a portfolio that required zero manual updates to keep my project list current. As a final-year student, I didn't want to spend time editing JSON files every time I shipped a new feature or started a new internship project.
+
+The solution was to treat the portfolio not as a static display, but as a dynamic "operating system" that consumes manifests and raw content via the **GitHub API**.
+
+![Home Page](/assets/screenshots/portfolio-os.png)
+
+## Learning 1: Manifest-Driven Architecture
+
+The core engineering learning was defining a strict data contract between my portfolio and my external repositories. I created the **`.debatreya`** JSON schema to act as the metadata layer.
+
+```json
+// The strict data contract defined for all my repos
+{
+  "id": "portfolio-os",
+  "name": "debatreyadas.dev",
+  "tagline": "A Manifest-Driven Developer OS",
+  "techStack": ["Next.js", "Quarto", "KaTeX"],
+  "featured": true,
+  "priority": 100,
+  "hasDeepDive": true 
+}
+
+```
+
+This allows the portfolio to perform **Feature Discovery** simply by crawling my GitHub account.
+
+## Learning 2: Decoupled Sync Logic (The "Handshake")
+
+The second major learning was implementing a secure and efficient discovery engine. I had to ensure the portfolio only fetched *my* projects.
+
+The finalized logic uses a specific GitHub Search API query:
+`user:Debatreya topic:portfolio`
+
+*Conceptual Diagram: The API Handshake (Discovery -> Extraction -> Aggregation)*
+
+### The Technical Challenge: MDX vs. Quarto
+
+Originally, I intended to use standard MDX for project deep-dives. However, my high-level technical notes (like those on parallel computing) require complex **$\LaTeX$ formulas**. When using `next-mdx-remote`, this caused compilation errors because the Acorn parser attempted to treat LaTeX curly braces `{}` as JavaScript JSX expressions.
+
+I learned that **Quarto (`.qmd`)** is a superior choice for an integrated engineering garden. It handles mathematical formulas natively, allowing me to define sync efficiency with professional notation:
+
+$$Efficiency = \frac{Total\_Repositories\_Crawled}{Manifest\_Hits}$$
+
+## Implementing the Renderer in Next.js
+
+The final learning was building the renderer in `lib/content.ts`. We configured the pipeline to parse the Quarto YAML frontmatter and use **`rehype-katex`** to render the formulas safely.
 
 ```typescript
-// Antigravity's UI will use this code-block for the 'Source' window
-export const syncEngine = async (id: string) => {
-  const data = await fetchGitHubAPI(`/repos/${id}/contents/.debatreya`);
-  return data.json();
+// Example of the sync utility with a defined code-filename
+export const getQuartoFile = async (path: string) => {
+  const rawResponse = await fetchGitHubRaw(path);
+  const { data, content } = matter(rawResponse);
+  
+  const processedContent = await remark()
+    .use(remarkMath)
+    .use(rehypeKatex) // Solves the Acorn math parsing error
+    .process(content);
+
+  return { meta: data, content: processedContent.toString() };
 }
+
+```
+
+## Results
+
+This architecture enables a fully decoupled, self-sustaining Developer OS. It proves that agentic development, when guided by clear architectural principles, can deliver a professional-grade portfolio with zero long-term maintenance overhead.
+
+> **System Note:** This record is part of the initial `debatreyadas.dev-v1` manifest and is synced via the GitHub API Discovery engine.
+
+---
+
+### 🧬 Connectivity Logic
+Once you push this file to your TIL repo, here is how the Antigravity-built UI will render:
+
+| Feature | Data Source | Result in UI |
+| :--- | :--- | :--- |
+| **Knowledge Graph** | `related_projects: ["portfolio-os"]` | Links the sidebar to the **portfolio-os** project card. |
+| **System Note** | `system_manifest: "debatreyadas.dev-v1"` | Shows the stylized **"Synced"** callout at the bottom. |
+| **Math Formulas** | `$$Efficiency = ...$$` | Renders perfectly with LaTeX tokens in Emerald Green (#14F195). |
+| **Code Window** | `code-filename: "src/lib/github-sync.ts"` | Displays the filename in the window header with the Copy button. |
