@@ -20,283 +20,549 @@ external_links:
     url: "https://www.linkedin.com/posts/debatreya-das-895517204_engineering-webdevelopment-nextjs-activity-7412573469462151168-RrB_/"
 ---
 
-### **Technical Write-Up: "BlackBox" Event Architecture**
+###  "BlackBox" Event Architecture**
+
+  
 
 **Project:** "BlackBox" - A real-time, online reverse-engineering competition for a college technical fest.
 
+  
+
 ---
+
+  
 
 ### **1. Executive Summary**
 
+  
+
 This document details the design and architecture of "BlackBox," an online competition for 30-100+ concurrent teams. The primary challenge was to create a system that was **100% free** to host, provided **instantaneous (0ms) feedback** for the core game mechanic, and was **robustly secure** against cheating.
+
+  
 
 We will first describe the initial "Pragmatic" architecture (v1.0), which prioritized speed and cost by offloading logic to the client. We will then analyze its critical security vulnerabilities, which relied heavily on human invigilation.
 
+  
+
 Finally, we will present the evolved "Zero-Trust" architecture (v2.0). This final design utilizes a hybrid Next.js and Server Action model to achieve all three goals: it remains 100% free, keeps the core "Test" function instant, and implements a cheat-proof, scalable server-side validation system that eliminates the dependency on human invigilators.
 
+  
+
 ---
+
+  
 
 ### **2. The Core Challenge & Constraints**
 
+  
+
 The "BlackBox" event is a real-time, reverse-engineering competition. To architect a successful system, we first defined the gameplay rules, our non-negotiable success criteria, and the resulting technical challenges that must be solved.
 
+  
+
 ---
+
+  
 
 #### **2.1. Event Format & Gameplay Rules**
 
-1. **Login & Progression:** The event is for teams, but only the **Team Leader** can log in. The competition consists of **8 levels (questions)** that must be solved *serially* (i.e., Level 2 unlocks only after Level 1 is correctly submitted).  
-2. **The "BlackBox" Loop:** For each level, the user is told the *number* of integer parameters a hidden function f takes (e.g., a, b, c).  
-3. **Testing:** The UI provides input boxes for these parameters and a "Test" button. Teams can enter any combination of integers and press "Test" an **unlimited** number of times. The UI will *only* display the function's output (e.g., f(5, 10, 3) = 53).  
-4. **Submission:** The team's goal is to guess the hidden function. They must submit their guess in a pre-defined LISP-like syntax (e.g., SUM(MUL(a,b),c)).  
-5. **Scoring & Timing:** The event has a **2-hour duration**. A timer starts at login. Each question has a different point value, and using a hint deducts marks. A **live leaderboard** shows team scores and their lastCorrectSubmit timestamp.  
+  
+
+1. **Login & Progression:** The event is for teams, but only the **Team Leader** can log in. The competition consists of **8 levels (questions)** that must be solved *serially* (i.e., Level 2 unlocks only after Level 1 is correctly submitted).  
+
+2. **The "BlackBox" Loop:** For each level, the user is told the *number* of integer parameters a hidden function f takes (e.g., a, b, c).  
+
+3. **Testing:** The UI provides input boxes for these parameters and a "Test" button. Teams can enter any combination of integers and press "Test" an **unlimited** number of times. The UI will *only* display the function's output (e.g., f(5, 10, 3) = 53).  
+
+4. **Submission:** The team's goal is to guess the hidden function. They must submit their guess in a pre-defined LISP-like syntax (e.g., SUM(MUL(a,b),c)).  
+
+5. **Scoring & Timing:** The event has a **2-hour duration**. A timer starts at login. Each question has a different point value, and using a hint deducts marks. A **live leaderboard** shows team scores and their lastCorrectSubmit timestamp.  
+
 6. **Winning:** The winner is the team with the **highest score** at the 2-hour mark. Ties are broken by the team that reached that score *quickest* (earliest lastCorrectSubmit timestamp).
 
+  
+
 ---
+
+  
 
 #### **2.2. Success Criteria & Core Objectives**
 
+  
+
 To be considered a success, the platform had to meet four strict, non-negotiable objectives.
 
-1. **Zero-Cost Operation:** The entire stack—including frontend hosting, backend logic, authentication, and the database—*must* run entirely within the **free tiers** of modern platforms (e.g., Vercel, Firebase).  
-2. **Instantaneous Feedback (User Experience):** The "Test" button is the core game mechanic. It *must* feel instantaneous, with **0ms network latency**. Any lag would destroy the fast-paced, iterative "guessing" feel of the game.  
-3. **Absolute Security & Fairness:** The system must be **cheat-proof**. No team can be allowed to (a) see the answers by inspecting the code, (b) skip levels, or (c) submit a fake high score to the leaderboard.  
+  
+
+1. **Zero-Cost Operation:** The entire stack—including frontend hosting, backend logic, authentication, and the database—*must* run entirely within the **free tiers** of modern platforms (e.g., Vercel, Firebase).  
+
+2. **Instantaneous Feedback (User Experience):** The "Test" button is the core game mechanic. It *must* feel instantaneous, with **0ms network latency**. Any lag would destroy the fast-paced, iterative "guessing" feel of the game.  
+
+3. **Absolute Security & Fairness:** The system must be **cheat-proof**. No team can be allowed to (a) see the answers by inspecting the code, (b) skip levels, or (c) submit a fake high score to the leaderboard.  
+
 4. **High-Concurrency Stability (Scalability):** The system must flawlessly support 30-100+ teams *simultaneously* spamming the "Test" button and submitting answers, all within the 2-hour window.
 
+  
+
 ---
+
+  
 
 #### **2.3. The Core Technical Challenges**
 
+  
+
 Our objectives created three immediate and conflicting technical challenges that defined the entire project.
 
-1. **The Central Conflict (Latency vs. Security):** * To achieve **Instant Feedback (Objective #2)**, the "Test" function logic *must* run on the client-side.  
-   * But, if the logic runs on the client, how do we achieve **Security (Objective #3)**? A user could simply open the browser's DevTools, read the obfuscated source code, and find the answer, making the game trivial.  
-2. **The Cost-of-Scale Problem:** * The "Test" button will be spammed. If 50 teams click it 100 times a minute, that's 5,000 invocations/minute.  
-   * A standard serverless API (the usual **Zero-Cost Objective #1** solution) would have its free-tier quota (e.g., 1 million invocations/month) **exhausted in hours**, taking the entire event offline. This rules out an API-based "Test" button.  
-3. **The Authoritative State Problem:** * If the "Test" logic is on the client, but the *score* is on the server, how do we securely link them?  
-   * The system must be able to **trust** that a user *actually* solved the puzzle before it accepts their "Submit" request and updates the global leaderboard. We must prevent a cheater from just *telling* the server, "I solved Level 1," without having done the work.
+  
+
+1. **The Central Conflict (Latency vs. Security):** * To achieve **Instant Feedback (Objective #2)**, the "Test" function logic *must* run on the client-side.  
+
+   * But, if the logic runs on the client, how do we achieve **Security (Objective #3)**? A user could simply open the browser's DevTools, read the obfuscated source code, and find the answer, making the game trivial.  
+
+2. **The Cost-of-Scale Problem:** * The "Test" button will be spammed. If 50 teams click it 100 times a minute, that's 5,000 invocations/minute.  
+
+   * A standard serverless API (the usual **Zero-Cost Objective #1** solution) would have its free-tier quota (e.g., 1 million invocations/month) **exhausted in hours**, taking the entire event offline. This rules out an API-based "Test" button.  
+
+3. **The Authoritative State Problem:** * If the "Test" logic is on the client, but the *score* is on the server, how do we securely link them?  
+
+   * The system must be able to **trust** that a user *actually* solved the puzzle before it accepts their "Submit" request and updates the global leaderboard. We must prevent a cheater from just *telling* the server, "I solved Level 1," without having done the work.
+
+  
 
 ---
+
+  
 
 ### **3. Initial Architecture (v1.0): The "Pragmatic, Invigilator-Reliant" Model**
 
+  
+
 The first design was a "client-heavy" architecture that ingeniously solved the cost and latency problems. However, it did so by trading security for speed, creating a system that was functional but entirely dependent on human invigilation to prevent cheating.
 
-* **Tech Stack:** * **Frontend:** React (Static Build, deployed on Vercel)  
-  * **Database:** Firebase Firestore (using the **Client-Side SDK**)  
-  * **Authentication:** Firebase Authentication
+  
+
+* **Tech Stack:** * **Frontend:** React (Static Build, deployed on Vercel)  
+
+  * **Database:** Firebase Firestore (using the **Client-Side SDK**)  
+
+  * **Authentication:** Firebase Authentication
+
+  
 
 ---
+
+  
 
 #### **3.1. Core Mechanism**
 
+  
+
 **1. Initial Data Load:**
+
+  
 
 Upon a successful login, the React application would download a single, large questions.json file. This file contained the entire game's data for all 8 levels, structured as an array of objects. Each object included:
 
-* level: The level number.  
-* questionText: The prompt (e.g., "This function takes 2 parameters...").  
-* obfuscatedFunction: A string of heavily obfuscated JavaScript code representing the "Test" function.  
+  
+
+* level: The level number.  
+
+* questionText: The prompt (e.g., "This function takes 2 parameters...").  
+
+* obfuscatedFunction: A string of heavily obfuscated JavaScript code representing the "Test" function.  
+
 * validAnswerHashes: An array of pre-hashed strings for all known correct answers.
+
+  
 
 **2. "Test" Button (Client-Side Execution):**
 
+  
+
 This was the v1.0's primary advantage, achieving the 0ms latency and 0-cost goals.
 
-* When a user entered parameters (e.g., a=5, b=10) and clicked "Test," the client's game engine would retrieve the obfuscatedFunction string for the currentLevel from its state.  
-* This string of obfuscated code was then executed at runtime (e.g., using new Function()). It was designed to de-obfuscate *itself* in memory, run the *actual* blackbox logic (e.g., a+b), and return the result (15).  
+  
+
+* When a user entered parameters (e.g., a=5, b=10) and clicked "Test," the client's game engine would retrieve the obfuscatedFunction string for the currentLevel from its state.  
+
+* This string of obfuscated code was then executed at runtime (e.g., using new Function()). It was designed to de-obfuscate *itself* in memory, run the *actual* blackbox logic (e.g., a+b), and return the result (15).  
+
 * This output was displayed to the user. The entire process was instant and made zero API calls.
+
+  
 
 **3. "Submit" Button (Client-Side Validation):**
 
+  
+
 This logic was also 100% client-side, designed for immediate feedback.
 
-* **Answer Format:** Participants were instructed to submit answers in a specific LISP-like syntax (e.g., SUM(MUL(a,b),c)). The client-side code would first sanitize this input (trim whitespace, convert to uppercase).  
-* **Validation Process:** The sanitized answerString was then hashed using a client-side hashing function.  
-* **Multiple Answers:** To ensure fairness, the validAnswerHashes array was pre-computed with the hashes of all known correct permutations (e.g., SUM(MUL(a,b),c) and SUM(c,MUL(a,b))). The client checked if the userAnswerHash existed anywhere in this array.  
+  
+
+* **Answer Format:** Participants were instructed to submit answers in a specific LISP-like syntax (e.g., SUM(MUL(a,b),c)). The client-side code would first sanitize this input (trim whitespace, convert to uppercase).  
+
+* **Validation Process:** The sanitized answerString was then hashed using a client-side hashing function.  
+
+* **Multiple Answers:** To ensure fairness, the validAnswerHashes array was pre-computed with the hashes of all known correct permutations (e.g., SUM(MUL(a,b),c) and SUM(c,MUL(a,b))). The client checked if the userAnswerHash existed anywhere in this array.  
+
 * **Invigilator's Secret Code:** Each level's validAnswerHashes list also included a pre-hashed "secret code." If a team discovered a novel, logically correct answer we hadn't anticipated, an invigilator could manually verify it and provide this secret code, allowing the team to pass the level.
+
+  
 
 **4. Database Update (Client-Side Write):**
 
+  
+
 On a successful client-side hash match, the client itself would execute the call to the Firebase SDK to update its score and currentLevel in the Firestore database. This required a permissive Firestore Security Rule (e.g., allow write: if request.auth.uid == userId;).
 
+  
+
 ---
+
+  
 
 #### **3.2. v1.0 Security Flaws**
 
+  
+
 This model's security relied entirely on the assumption that participants would not open the browser's developer tools. This reliance on **human invigilation** created two critical, game-breaking vulnerabilities.
 
-* **Flaw #1: Insecure State (DevTools Attack):** A participant could open the "Sources" or "Network" tab, find the questions.json file, and see all 8 obfuscated functions and answer hashes. This allowed them to solve all levels offline. Furthermore, a savvy user could use React DevTools to manually change the currentLevel state or modify localStorage (if used) to bypass checks and skip levels at will.  
-* **Flaw #2: Insecure Database (Console Attack):** This was the most critical flaw. Since the client was authorized to write its own score, a user could simply open the browser console and run their own Firebase command to win the game in 5 seconds:  
+  
+
+* **Flaw #1: Insecure State (DevTools Attack):** A participant could open the "Sources" or "Network" tab, find the questions.json file, and see all 8 obfuscated functions and answer hashes. This allowed them to solve all levels offline. Furthermore, a savvy user could use React DevTools to manually change the currentLevel state or modify localStorage (if used) to bypass checks and skip levels at will.  
+
+* **Flaw #2: Insecure Database (Console Attack):** This was the most critical flaw. Since the client was authorized to write its own score, a user could simply open the browser console and run their own Firebase command to win the game in 5 seconds:  
+
+  
 
 ```javascript
+
 // A cheater runs this in the console to win
+
 firebase.firestore().collection("teams").doc("my-team-uid").update({
-  score: 99999,
-  currentLevel: 8,
-  lastCorrectSubmit: new Date()
+
+  score: 99999,
+
+  currentLevel: 8,
+
+  lastCorrectSubmit: new Date()
+
 });
+
+  
 
 ```
 
+  
+
 ---
+
+  
 
 ### **4. Evolved Architecture (v2.0): The "Zero-Trust, Gated" Model**
 
+  
+
 The v1.0 flaws were critical, forcing a move to a **Zero-Trust** policy: **The client cannot be trusted with any data or logic it has not yet earned.** This hybrid model keeps the "Test" button instant (client-side) but makes all state transitions and submissions authoritative (server-side).
 
+  
+
 * **Tech Stack:** * **Framework:** **Next.js 14+ (App Router)** on Vercel
+
 * **Database:** Firebase Firestore (using the **Admin SDK** on the server)
+
 * **Authentication:** Firebase Authentication
 
-
+  
+  
+  
 
 ---
+
+  
 
 #### **4.1. Core Mechanic: "Gated Encryption"**
 
+  
+
 We no longer send all 8 questions at once. The server "gates" each level, and the client only has the data for the *one* level they are currently on.
+
+  
 
 **1. questions Collection (Firestore):**
 
+  
+
 This collection lives securely in Firestore, accessible only by the server-side Admin SDK.
 
+  
+
 * q1: {
+
 encryptedData: "...",
+
 decryptionKey: "...",
+
 validAnswerHashes: ["hash1", "hash2", "hash3"]
+
 }
+
 * q2: {
+
 encryptedData: "...",
+
 decryptionKey: "...",
+
 validAnswerHashes: ["hash_secret_code_q2", ...]
+
 }
+
 * ...
+
 * **encryptedData**: A string containing the encrypted question text *and* the heavily obfuscated JavaScript "Test" function.
+
 * **decryptionKey**: The key required to decrypt the encryptedData for this specific level.
+
 * **validAnswerHashes**: The server's authoritative list of all valid answer hashes, including permutations (SUM(a,b)) and the invigilator's "secret code."
+
+  
 
 **2. teams Collection (Firestore):**
 
+  
+
 * team-abc: { score: 0, currentLevel: 1, **isDisqualified: false** }
+
 * **isDisqualified**: The flag for our "One-Strike" security rule.
+
+  
 
 **3. The "Gated" Workflow:**
 
+  
+
 This flow makes the "DevTools Attack" (Flaw #1) impossible, as the data for future levels literally does not exist on the client.
 
+  
+
 1. **Initial Load:** The user logs in. The client calls a Server Action getInitialData().
+
 2. **Server Response (Level 1):** The server authenticates the user, checks they are on currentLevel: 1, and returns *only* the encryptedData and decryptionKey for Level 1.
+
 3. **Client Stores State:** The client now holds encryptedData_Q1 and decryptionKey_Q1 in its React state.
+
 4. **"Test" Button Logic (Local & Instant):** * A user enters parameters (e.g., a=5, b=10).
+
 * The client's game engine uses decryptionKey_Q1 to decrypt encryptedData_Q1 in memory.
+
 * The result of this decryption is **a string of obfuscated JavaScript code** (which also contains the question text).
+
 * This obfuscated code is then executed at runtime (e.g., using new Function()). It de-obfuscates *itself* in memory, runs the *actual* blackbox logic (e.g., a+b), and returns the result (15).
+
 * This output is displayed to the user. The entire process is local, instant, and secure, as the "real" function logic is never plainly visible.
 
+  
+  
 
 5. **"Submit" Button Logic:** * The user submits their guess (e.g., SUM(a,b)).
+
 * The client does a *preliminary* hash check for quick UX feedback (e.g., "Wrong format" or "Incorrect").
+
 * If the client-side check *passes*, it calls the submitAnswer Server Action, sending the raw answerString.
 
+  
+  
 
 6. **Server Validation (Authoritative):** The server receives the answerString and currentLevel. It then performs the real validation (detailed in 4.2).
+
 7. **Server Response (Level 2):** If the server validation is successful, it updates the DB and returns { success: true, nextEncryptedData: "...", nextKey: "..." } (the data for Level 2).
+
 8. **Loop:** The client discards the Level 1 data and stores the new Level 2 data. The gameplay loop repeats, with the client never having access to more than one level at a time.
 
+  
+
 ---
+
+  
 
 #### **4.2. The Secure Server Action: The Heart of the Architecture**
 
+  
+
 The "Console Attack" (Flaw #2) is solved by moving all validation and database writes to a **Next.js Server Action**. This action acts as the automated, incorruptible invigilator. Any attempt to call this action with a fake answer will be caught by the "One-Strike" rule.
 
-* **app/actions.js (Simplified Server-Side Logic):** ```javascript
+  
+
+* **app/actions.js (Simplified Server-Side Logic):** 
+```javascript
+
 'use server';
 
+  
+
 import { adminDb } from './firebase-admin-config'; // Secure Admin SDK
+
 import { auth } from './auth-config'; // Your auth method
+
 import { myHashFunction } from './utils'; // Your custom hash function
 
+  
+
 export async function submitAnswer(currentLevel, answerString) {
+
 // 1. Get the authenticated user
+
 const user = await auth().getUser();
+
 if (!user) { throw new Error("Not Authorized"); }
 
+  
+
 // 2. Fetch team's *authoritative* state from the server
+
 const teamRef = adminDb.collection('teams').doc(user.uid);
+
 const teamDoc = await teamRef.get();
+
 const teamData = teamDoc.data();
 
+  
+
 // 3. Prevent invalid state (replay attacks, banned users, level mismatch)
+
 if (teamData.isDisqualified || teamData.currentLevel !== currentLevel) {
+
 // Silently fail or return a generic error
+
 return { success: false, error: "Validation Failed." };
+
 }
+
+  
 
 // 4. --- THE "ONE-STRIKE" SERVER-SIDE VALIDATION ---
+
 // This is the re-validation that stops all cheating.
+
 // It ignores any client-side checks.
+
 const qDoc = await adminDb.collection('questions').doc(currentLevel).get();
+
 const validAnswerHashes = qDoc.data().validAnswerHashes;
 
+  
+
 // Ensure the server-side hash is identical to the client's
+
 const userAnswerHash = myHashFunction(answerString);
 
+  
+
 // 5. Check the hash against the server's authoritative list
+
 if (validAnswerHashes.includes(userAnswerHash)) {
+
 //
+
 // --- SUCCESS PATH ---
+
 //
+
 const nextLevel = currentLevel + 1;
 
-```
 // 1. Securely update the database
+
 await teamRef.update({
-  score: teamData.score + qDoc.data().marks, // Marks from qDoc
-  currentLevel: nextLevel,
-  lastCorrectSubmit: new Date()
+
+  score: teamData.score + qDoc.data().marks, // Marks from qDoc
+
+  currentLevel: nextLevel,
+
+  lastCorrectSubmit: new Date()
+
 });
 
+  
+
 // 2. Fetch and return the *next* level's gated data
+
 // (Handle end-of-game logic if nextLevel > 8)
+
 const nextQDoc = await adminDb.collection('questions').doc(nextLevel).get();
 
-return { 
-  success: true, 
-  nextEncryptedQuestion: nextQDoc.data().encryptedData,
-  nextKey: nextQDoc.data().decryptionKey
+  
+
+return {
+
+  success: true,
+
+  nextEncryptedQuestion: nextQDoc.data().encryptedData,
+
+  nextKey: nextQDoc.data().decryptionKey
+
 };
 
-```
+  
 
 } else {
+
 //
+
 // --- FAILURE PATH (THE "ONE-STRIKE" RULE) ---
+
 // A non-valid hash was submitted. This is an invalid request,
+
 // treated as a cheat attempt from the console.
+
 await teamRef.update({ isDisqualified: true });
+
 return { success: false, error: "DISQUALIFIED" };
+
 }
+
 }
 
 ```
+
+  
 
 ---
 
+  
+
 ### **5. Final Analysis: Cost, Fairness, & Scalability**
+
+  
 
 This v2.0 architecture successfully achieves all project goals.
 
+  
+
 | Metric | v1.0 (Invigilator-Reliant) | v2.0 (Zero-Trust) |
+
 | :--- | :--- | :--- |
+
 | **Cost** | **$0.00** (Free Tiers) | **$0.00** (Free Tiers) |
+
 | **"Test" Latency** | **0ms** (Local) | **0ms** (Local) |
+
 | **"Submit" Latency** | ~10ms (Local) | ~200-500ms (Server Roundtrip) |
+
 | **Cheat-Proof?** | **No.** Highly vulnerable. Invigilator-Reliant | **Yes.** Fully secure and authoritative. |
+
 | **Invigilator Load** | **High.** Required to watch all screens to counter cheats. | **Zero.** The server is the invigilator. |
+
 | **Scalability** | Low. Limited by # of invigilators. | **High.** Scales effortlessly to 100+ teams. |
+
+  
 
 ### **6. Conclusion**
 
+  
+
 By evolving from a purely client-side model to a hybrid "Gated" architecture using Next.js Server Actions, we achieved all our objectives. The "Test" button remains instant and free, satisfying the core gameplay requirement. The "Submit" logic is now handled by a secure, server-side function that validates every request, preventing all known cheating vectors.
+
+  
 
 This v2.0 model is robust, scalable, and remains 100% free to host, making it the ideal solution for this and future online competitions.
