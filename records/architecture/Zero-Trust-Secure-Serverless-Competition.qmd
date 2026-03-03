@@ -533,26 +533,15 @@ return { success: false, error: "DISQUALIFIED" };
 
 ### **5. Final Analysis: Cost, Fairness, & Scalability**
 
-  
-
 This v2.0 architecture successfully achieves all project goals.
 
-  
-
 | Metric | v1.0 (Invigilator-Reliant) | v2.0 (Zero-Trust) |
-
 | :--- | :--- | :--- |
-
 | **Cost** | **$0.00** (Free Tiers) | **$0.00** (Free Tiers) |
-
 | **"Test" Latency** | **0ms** (Local) | **0ms** (Local) |
-
 | **"Submit" Latency** | ~10ms (Local) | ~200-500ms (Server Roundtrip) |
-
 | **Cheat-Proof?** | **No.** Highly vulnerable. Invigilator-Reliant | **Yes.** Fully secure and authoritative. |
-
 | **Invigilator Load** | **High.** Required to watch all screens to counter cheats. | **Zero.** The server is the invigilator. |
-
 | **Scalability** | Low. Limited by # of invigilators. | **High.** Scales effortlessly to 100+ teams. |
 
   
