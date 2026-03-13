@@ -15,7 +15,7 @@ contributor_avatars:
 
 external_links: 
   - name: "LinkedIn"
-    url: "https://www.linkedin.com/posts/debatreya-das-895517204_engineering-webdevelopment-nextjs-activity-7412573469462151168-RrB_/"
+    url: "https://www.linkedin.com/posts/debatreya-das-895517204_from-paas-to-bare-metal-my-first-production-activity-7438151171518664704-9PyC"
 ---
 
 ## From PaaS to Bare Metal – My First Production Deployment
