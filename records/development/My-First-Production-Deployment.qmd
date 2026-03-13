@@ -1,0 +1,69 @@
+---
+title: "From PaaS to Bare Metal – My First Production Deployment"
+date: 2026-03-13
+category: "Deployment"
+tags: ["#self-hosting", "#bare-metal", "#docker-compose", "#nextjs", "#caddy", "#minio", "#postgres", "#devops", "#intranet", "#infrastructure"]
+read_time: "5 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-003"
+related_tils: [] 
+related_projects: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars: 
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+
+external_links: 
+  - name: "LinkedIn"
+    url: "https://www.linkedin.com/posts/debatreya-das-895517204_engineering-webdevelopment-nextjs-activity-7412573469462151168-RrB_/"
+---
+
+## From PaaS to Bare Metal – My First Production Deployment
+
+### The Context
+
+After years of relying on Platform-as-a-Service (PaaS) providers for my projects, I finally moved a production-level application (a college-specific system) onto a dedicated local server. I went from "theoretical knowledge" of SSH and EC2 to managing a physical i7 machine with 16GB RAM and 1TB storage on the college intranet.
+
+### The Realization
+
+The biggest realization wasn't just how to `ssh` into a box, but the **architectural shift** required when moving from cloud-native managed services (S3, Neon Postgres) to self-hosted equivalents (MinIO, local Postgres) within a single machine.
+
+### Technical Challenges & Solutions
+
+#### 1. Environment-Agnostic Storage & DB
+
+In development, I used **Neon Postgres** and **AWS S3**. For production, to utilize the 1TB of local storage and avoid costs, I shifted to **MinIO** and a local **Postgres** instance.
+
+* **The Fix:** I implemented a toggle system using environment variables. The application logic switches between S3/MinIO and Neon/Local PG drivers based on the `NODE_ENV`.
+* **The Data Migration Caveat:** Migrating data via `pg_dump` brought over S3 signed URLs. I had to script a transformation to convert those hardcoded cloud links into local MinIO routes.
+
+#### 2. Containerization with Docker Compose
+
+To make the system "one-click" deployable and manageable for the future, I wrapped everything into a `docker-compose.yml`:
+
+* **App Service:** A custom Docker image of the Next.js app.
+* **Database:** A Postgres container.
+* **Storage:** A MinIO container for S3-compatible object storage.
+* **Reverse Proxy:** Used **Caddy** to handle incoming traffic on Port 80 and route it to the Next.js app (Port 3000) and MinIO public routes.
+
+#### 3. The Network Setup
+
+* **Initial Physical Contact:** Installed Ubuntu and enabled `sshd`.
+* **Remote Management:** Once the SSH server was live, I retreated to my hostel room. Since the server and my laptop were on the same intranet, I managed the entire 12-hour deployment (6 PM to 6 AM) remotely.
+
+![Deployment Image](/assets/diagrams/TIL_003_deployment.png)
+
+### Key Takeaways
+
+* **Caddy > Nginx (for speed):** Caddy’s simplicity for reverse proxying is unmatched when you need to get up and running quickly.
+* **Production != One-off:** Deployment isn't just about making the site "visible"; it's about building a **scalable system** where versioning and service dependencies are handled automatically (hence Docker).
+* **Intranet Security:** Since this is an internal college tool, HTTP over Port 80 was acceptable, but it taught me the importance of internal routing.
+
+### Current Stack
+
+| Service | Development | Production (Self-Hosted) |
+| --- | --- | --- |
+| **Framework** | Next.js | Next.js (Dockerized) |
+| **Database** | Neon Postgres | Postgres (Docker) |
+| **Object Storage** | AWS S3 | MinIO |
+| **Gateway** | Vercel | Caddy (Reverse Proxy) |
