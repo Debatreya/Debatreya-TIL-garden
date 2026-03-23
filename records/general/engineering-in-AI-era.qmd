@@ -17,15 +17,15 @@ contributor_avatars:
 ---
 
 I recently had a conversation with ChatGPT:
-```
-What do you think? 
-Should a modern-day aspiring software engineering student 
-study harder than those who studied before the advent of AI?
-```
+
+>What do you think? 
+>Should a modern-day aspiring software engineering student 
+>study harder than those who studied before the advent of AI?
+
 
 And what I got as a response was beyond the expectation of most Engineering students. Here I am sharing the response I got from ChatGPT:
-```
-This is a genuinely important question. My honest take:
+---
+"This is a genuinely important question. My honest take:
 
 **Short answer: Study harder, but differently. The bar has moved.**
 
@@ -114,8 +114,8 @@ The bar is higher. Not because you need to code more, but because *thinking clea
 
 The irony: AI is making good engineering education more important, not less important.
 
-Does that match your intuition?
-```
+Does that match your intuition?"
+---
 
 This is a very insightful response from ChatGPT. I have been thinking about this topic for a while and I agree with most of the points mentioned in the response.
 The key takeaway for me is that while AI can automate a lot of the coding work, it cannot replace the need for deep understanding of systems, fundamentals, and problem-solving skills. As aspiring software engineers, we need to focus on developing these skills rather than just relying on AI to do the coding for us.
