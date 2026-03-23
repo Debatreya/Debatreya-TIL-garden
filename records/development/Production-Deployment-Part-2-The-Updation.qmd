@@ -15,7 +15,7 @@ contributor_avatars:
 
 external_links: 
   - name: "LinkedIn"
-    url: "https://www.linkedin.com/posts/debatreya-das-895517204_devops-databasemigration-systemdesign-activity-7441944871168503808-Zm7m/"
+    url: "https://www.linkedin.com/posts/debatreya-das-895517204_from-paas-to-bare-metal-part-2-the-updation-activity-7441948874749116416-uvza/"
 ---
 
 ## Part 2 – The "Day 2" Challenge: Updates and Blue-Green DB Sync
