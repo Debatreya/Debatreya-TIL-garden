@@ -24,98 +24,98 @@ I recently had a conversation with ChatGPT:
 
 
 And what I got as a response was beyond the expectation of most Engineering students. Here I am sharing the response I got from ChatGPT:
----
-"This is a genuinely important question. My honest take:
 
-**Short answer: Study harder, but differently. The bar has moved.**
+>"This is a genuinely important question. My honest take:
+>
+>**Short answer: Study harder, but differently. The bar has moved.**
+>
+>**Why not "study less":**
+>
+>If you just code less because I can write it, you're missing the point. The market will flood with people who can prompt AI but don't understand what they're building. 
+>That's a commodity position.
+>
+>**Why harder (in different areas):**
+>
+>1. **Systems thinking is non-negotiable now**
+>   - Before: You could get by as a "good coder" who knew patterns
+>   - Now: If you can't design systems, think about tradeoffs, ask hard questions—what am I for?
+>   - AI can implement anything you clearly specify. If you can't specify it, you're lost
+>
+>2. **Fundamentals matter more, not less**
+>   - You need to understand what AI *can't* do well
+>   - You need to know when it's bullshitting vs. actually correct
+>   - This requires depth in CS fundamentals (algorithms, data structures, complexity, concurrency, networking)
+>   - "I'll just ask Claude" only works if you can evaluate Claude's answer
+>
+>3. **Problem-solving and communication got harder**
+>   - With AI, clarity of thought is your bottleneck
+>   - Can you describe a complex problem crisply?
+>   - Can you think through a design without implementation details clouding your judgment?
+>   - These are *harder* skills to develop
+>
+>4. **Knowing what you don't know is critical**
+>   - AI will confidently generate plausible-sounding wrong answers
+>   - You need to spot them
+>   - This requires actual expertise, not just pattern-matching code examples
+>
+>**Where you should study less:**
+>
+>- ❌ Memorizing APIs and syntax
+>- ❌ Grinding LeetCode for "know this pattern"
+>- ❌ Copying tutorials line-by-line
+>- ❌ Worrying about "how do I write a function to do X"
+>
+>**Where you should study harder:**
+>
+>- ✅ **Why** do different approaches exist? What are the tradeoffs?
+>- ✅ Read papers, understand research, know the landscape of ideas
+>- ✅ Build something real (not tutorials)—hit real problems, solve them
+>- ✅ Deep dive into one or two domains (databases, distributed systems, graphics, etc.)
+>- ✅ Learn to think architecturally
+>- ✅ Study failure modes: why do systems break?
+>- ✅ Communication: can you explain complex things clearly?
+>
+>**The practical implication:**
+>
+>**Before AI:**
+>- You could be reasonably productive just by being good at coding
+>- Juniors could learn by copying senior patterns
+>- Domain expertise was a nice-to-have
+>
+>**After AI:**
+>- Good coding is table stakes (not valuable anymore)
+>- Juniors who just know how to prompt AI will be commoditized
+>- Domain expertise + systems thinking + judgment = valuable
+>
+>**What this means for studying:**
+>
+>- **Study less of:** Implementation details, memorization, grinding similar problems
+>- **Study more of:** First principles, reasoning about tradeoffs, real problem-solving
+>- **Study differently:** Build things, read more papers/case studies, understand *why* not just *how*
+>- **Study with purpose:** Can you use AI as a tool to think better, or are you using it as a crutch?
+>
+>**The hard truth:**
+>
+>The students who will do well:
+>- Study systems and fundamentals *deeper*
+>- Think about problems *more carefully* (because AI removes friction, thinking is the bottleneck)
+>- Build real things and learn from failure
+>- Get domain expertise early
+>
+>The students who will struggle:
+>- Think they can get away with less understanding
+>- Use AI as a shortcut instead of a tool
+>- Don't build anything real
+>- Never develop judgment about whether solutions are good
+>
+>**My actual take:**
+>
+>The bar is higher. Not because you need to code more, but because *thinking clearly* is now your limiting factor. A student who studies systems architecture, reads papers, builds one complex project from scratch, and understands their domain deeply will be valuable. A student who just learned to prompt AI will not be.
+>
+>The irony: AI is making good engineering education more important, not less important.
+>
+>Does that match your intuition?"
 
-**Why not "study less":**
-
-If you just code less because I can write it, you're missing the point. The market will flood with people who can prompt AI but don't understand what they're building. 
-That's a commodity position.
-
-**Why harder (in different areas):**
-
-1. **Systems thinking is non-negotiable now**
-   - Before: You could get by as a "good coder" who knew patterns
-   - Now: If you can't design systems, think about tradeoffs, ask hard questions—what am I for?
-   - AI can implement anything you clearly specify. If you can't specify it, you're lost
-
-2. **Fundamentals matter more, not less**
-   - You need to understand what AI *can't* do well
-   - You need to know when it's bullshitting vs. actually correct
-   - This requires depth in CS fundamentals (algorithms, data structures, complexity, concurrency, networking)
-   - "I'll just ask Claude" only works if you can evaluate Claude's answer
-
-3. **Problem-solving and communication got harder**
-   - With AI, clarity of thought is your bottleneck
-   - Can you describe a complex problem crisply?
-   - Can you think through a design without implementation details clouding your judgment?
-   - These are *harder* skills to develop
-
-4. **Knowing what you don't know is critical**
-   - AI will confidently generate plausible-sounding wrong answers
-   - You need to spot them
-   - This requires actual expertise, not just pattern-matching code examples
-
-**Where you should study less:**
-
-- ❌ Memorizing APIs and syntax
-- ❌ Grinding LeetCode for "know this pattern"
-- ❌ Copying tutorials line-by-line
-- ❌ Worrying about "how do I write a function to do X"
-
-**Where you should study harder:**
-
-- ✅ **Why** do different approaches exist? What are the tradeoffs?
-- ✅ Read papers, understand research, know the landscape of ideas
-- ✅ Build something real (not tutorials)—hit real problems, solve them
-- ✅ Deep dive into one or two domains (databases, distributed systems, graphics, etc.)
-- ✅ Learn to think architecturally
-- ✅ Study failure modes: why do systems break?
-- ✅ Communication: can you explain complex things clearly?
-
-**The practical implication:**
-
-**Before AI:**
-- You could be reasonably productive just by being good at coding
-- Juniors could learn by copying senior patterns
-- Domain expertise was a nice-to-have
-
-**After AI:**
-- Good coding is table stakes (not valuable anymore)
-- Juniors who just know how to prompt AI will be commoditized
-- Domain expertise + systems thinking + judgment = valuable
-
-**What this means for studying:**
-
-- **Study less of:** Implementation details, memorization, grinding similar problems
-- **Study more of:** First principles, reasoning about tradeoffs, real problem-solving
-- **Study differently:** Build things, read more papers/case studies, understand *why* not just *how*
-- **Study with purpose:** Can you use AI as a tool to think better, or are you using it as a crutch?
-
-**The hard truth:**
-
-The students who will do well:
-- Study systems and fundamentals *deeper*
-- Think about problems *more carefully* (because AI removes friction, thinking is the bottleneck)
-- Build real things and learn from failure
-- Get domain expertise early
-
-The students who will struggle:
-- Think they can get away with less understanding
-- Use AI as a shortcut instead of a tool
-- Don't build anything real
-- Never develop judgment about whether solutions are good
-
-**My actual take:**
-
-The bar is higher. Not because you need to code more, but because *thinking clearly* is now your limiting factor. A student who studies systems architecture, reads papers, builds one complex project from scratch, and understands their domain deeply will be valuable. A student who just learned to prompt AI will not be.
-
-The irony: AI is making good engineering education more important, not less important.
-
-Does that match your intuition?"
----
 
 This is a very insightful response from ChatGPT. I have been thinking about this topic for a while and I agree with most of the points mentioned in the response.
 The key takeaway for me is that while AI can automate a lot of the coding work, it cannot replace the need for deep understanding of systems, fundamentals, and problem-solving skills. As aspiring software engineers, we need to focus on developing these skills rather than just relying on AI to do the coding for us.
