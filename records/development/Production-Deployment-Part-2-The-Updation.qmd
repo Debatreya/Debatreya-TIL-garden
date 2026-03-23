@@ -41,6 +41,8 @@ Merging databases is trickier than syncing files because of primary keys and sch
     3. Restored this merged $(x+y+z)$ dataset into the **Shadow DB**.
 * **The Switch:** Once the Shadow DB was verified, I took the app down for a brief window, renamed/altered the databases so the app pointed to the new $(x+y+z)$ version, and brought the app back up.
 
+![Deployment Image](/assets/diagrams/TIL_005_deployment.png)
+
 ### Lessons Learned
 * **Downtime vs. Integrity:** Taking the app down briefly during the `ALTER DATABASE` command ensures that no new data ($y'$) is written to the old DB while you are switching to the new one.
 * **Atomic Switches:** Renaming databases in Postgres is nearly instantaneous, making the "Dark Window" incredibly small.
