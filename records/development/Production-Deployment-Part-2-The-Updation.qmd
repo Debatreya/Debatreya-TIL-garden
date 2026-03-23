@@ -1,6 +1,6 @@
 ---
 title: "From PaaS to Bare Metal – Part 2: The Updation Challenge"
-date: 2026-03-23
+date: 2026-03-24
 category: "Deployment"
 tags: ["#devops", "#blue-green-deployment", "#postgres", "#minio", "#database-migration", "#docker-compose", "#backend-engineering"]
 read_time: "5 min"
@@ -15,15 +15,15 @@ contributor_avatars:
 
 external_links: 
   - name: "LinkedIn"
-    url: "https://www.linkedin.com/posts/debatreya-das-895517204_from-paas-to-bare-metal-my-first-production-activity-7438151171518664704-9PyC"
+    url: "https://www.linkedin.com/posts/debatreya-das-895517204_devops-databasemigration-systemdesign-activity-7441944871168503808-Zm7m/"
 ---
 
 ## Part 2 – The "Day 2" Challenge: Updates and Blue-Green DB Sync
 
 ### The Context
-Once the initial deployment was live on the college machine, the real challenge began: **Evolution.** We were constantly adding features and gathering new production data ($x+y$). Meanwhile, in the development environment, I was generating new schema changes and seed data ($x+z$). 
+Once the initial deployment was live on the college machine, the real challenge began: **Evolution.** We were constantly adding features and gathering new production data `(x+y)`. Meanwhile, in the development environment, I was generating new schema changes and seed data `(x+z)`. 
 
-The goal: Update the production environment to ($x+y+z$) with minimal downtime and zero data loss.
+The goal: Update the production environment to `(x+y+z)` with minimal downtime and zero data loss.
 
 ### The Strategy: Manual Blue-Green Migration
 Since I was working on a single bare-metal machine without a managed RDS, I couldn't just click "Restore." I had to orchestrate a manual Blue-Green swap for the database.
@@ -31,20 +31,20 @@ Since I was working on a single bare-metal machine without a managed RDS, I coul
 #### 1. The Storage Sync (MinIO)
 Syncing media was the "easy" part. I used a specialized `minio-init` container equipped with the **mc CLI** (MinIO Client). 
 * **The Process:** On container start, it performs a `mirror` from S3 to the local MinIO instance. 
-* **The Result:** It keeps existing production data ($x+y$) and adds new dev assets, ensuring no overwrites or deletions.
+* **The Result:** It keeps existing production data `(x+y)` and adds new dev assets, ensuring no overwrites or deletions.
 
-#### 2. The Database Merge ($x + y + z$)
+#### 2. The Database Merge `(x + y + z)`
 Merging databases is trickier than syncing files because of primary keys and schema constraints.
 * **The Shadow DB:** I created a "Shadow" (Green) database instance alongside the live "Main" (Blue) database.
-* **The Sync:** 1. Dumped the live production data ($x+y$).
-    2. Merged it with the new development SQL dump ($x+z$).
-    3. Restored this merged $(x+y+z)$ dataset into the **Shadow DB**.
-* **The Switch:** Once the Shadow DB was verified, I took the app down for a brief window, renamed/altered the databases so the app pointed to the new $(x+y+z)$ version, and brought the app back up.
+* **The Sync:** 1. Dumped the live production data `(x+y)`.
+    2. Merged it with the new development SQL dump `(x+z)`.
+    3. Restored this merged `(x+y+z)` dataset into the **Shadow DB**.
+* **The Switch:** Once the Shadow DB was verified, I took the app down for a brief window, renamed/altered the databases so the app pointed to the new `(x+y+z)` version, and brought the app back up.
 
 ![Deployment Image](/assets/diagrams/TIL_005_deployment.png)
 
 ### Lessons Learned
-* **Downtime vs. Integrity:** Taking the app down briefly during the `ALTER DATABASE` command ensures that no new data ($y'$) is written to the old DB while you are switching to the new one.
+* **Downtime vs. Integrity:** Taking the app down briefly during the `ALTER DATABASE` command ensures that no new data (`y'`) is written to the old DB while you are switching to the new one.
 * **Atomic Switches:** Renaming databases in Postgres is nearly instantaneous, making the "Dark Window" incredibly small.
 * **Schema Evolution:** This manual process highlighted why automated migration tools (like Prisma or Drizzle) are essential as projects scale.
 
