@@ -1,0 +1,117 @@
+---
+title: "From E-Waste to Private Cloud: The Triple-Threat Home Server Journey"
+date: 2026-04-26
+category: "Architecture"
+tags: ["#self-hosting", "#home-server", "#linux-mint", "#nas", "#filebrowser", "#tailscale"]
+read_time: "8 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-007"
+related_tils: []
+related_projects: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars:
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+external_links:
+  - name: "FileBrowser"
+    url: "https://filebrowser.org/index.html"
+---
+
+## The Motivation: Why Pay for the Cloud?
+
+I had an old home PC that was around 8 years old. Compared to my daily machine (Windows 11, i5 10th Gen, 16 GB RAM, 512 GB SSD), it felt laggy for regular use.
+
+The old PC specs were modest but still useful:
+
+- **CPU:** Intel i3 6th Gen
+- **RAM:** 4 GB DDR4
+- **Disk:** 1 TB HDD
+
+Linux always felt a bit smoother than Windows on this hardware. While checking disk usage, I noticed I still had more than 500 GB free. That triggered the core idea: instead of forcing this system to be a primary workstation, I could turn it into a practical home NAS and remote utility box.
+
+## The Plan: Partitioning for Practical Use
+
+I organized the disk around a simple and realistic multi-use layout:
+
+- **100 GB** for Linux Mint 24.04 XFCE
+- **100 GB** kept unallocated for future use
+- **150 GB** for a Windows partition (still over 50% free)
+- **500+ GB** dedicated to storage space for NAS use
+
+This way, the machine stays flexible: Linux for server tasks, Windows retained as a fallback, and a large dedicated storage partition for file access.
+
+## The Implementation: Bringing the Home NAS Online
+
+### Step 1: Boot Linux and Prepare the Vault
+
+After installing and booting Linux Mint XFCE, I mounted the 500+ GB storage partition at:
+
+`/mnt/vault`
+
+This became the central data location for all NAS files.
+
+### Step 2: Set Up Remote Access
+
+I installed **OpenSSH** to manage the system remotely and set up **Tailscale** so SSH works even when I am outside the local network.
+
+This gave me two useful access modes:
+
+- Local network SSH for fast LAN administration
+- Remote SSH through Tailscale without exposing router ports
+
+### Step 3: Family-Friendly NAS Interface with FileBrowser
+
+For file access with upload/download and a simple GUI, I used **FileBrowser**.
+
+I configured:
+
+- Admin user and additional users
+- Access to the mounted vault directory
+- Service on port `8080`
+
+On any connected device, opening:
+
+`http://<ipv4_of_pc>:8080`
+
+shows the FileBrowser login page. After authentication, my family can browse folders and manage files in a way that feels similar to a private Google Drive.
+
+### Step 4: Boot Automation and Service Reliability
+
+To keep the NAS dependable without manual intervention, I added boot-level automation:
+
+- **BIOS power recovery:** Configured BIOS so when mains power returns, the PC boots automatically.
+- **GRUB boot priority:** Kept Linux Mint at the top in the boot loader and set GRUB timeout to 5 seconds for automatic boot.
+- **FileBrowser daemon:** Configured FileBrowser as a background service so it starts automatically after every boot.
+
+Typical service workflow:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable filebrowser
+sudo systemctl start filebrowser
+sudo systemctl status filebrowser
+```
+
+With this setup, once boot is complete, the FileBrowser server is already running and ready on port `8080`.
+
+## The Action: Day-to-Day Operations
+
+The machine now serves two roles reliably:
+
+- **Home NAS role:** Centralized storage on `/mnt/vault` with easy browser-based access for family members
+- **Personal compute role:** A secondary Linux box that I can SSH into and delegate tasks to when needed
+
+This setup reduced storage pressure on personal devices and extracted real value from aging hardware without additional subscription costs.
+
+## Key Learnings and Takeaways
+
+Building this taught me practical lessons about repurposing old systems:
+
+1. **Old hardware can still be highly useful with the right workload.** It may feel slow for modern desktop usage, but it performs well as a storage and remote utility node.
+2. **Partition planning matters.** Separating OS space, reserve space, and NAS space made the system easier to manage.
+3. **Remote access changes usability.** OpenSSH plus Tailscale made the box practical beyond the local network.
+4. **GUI access improves adoption for non-technical users.** FileBrowser made the NAS usable for family members without teaching terminal commands.
+
+## Final Thought
+
+Before paying for more cloud storage, check the hardware you already own. Even an older PC can become a dependable, private home NAS with the right software choices.
