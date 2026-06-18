@@ -1,0 +1,93 @@
+---
+title: "System Design Patterns — Quick Patterns Reference"
+date: 2026-04-30
+category: "Architecture"
+tags: ["#system-design", "#patterns", "#microservices", "#devops"]
+read_time: "6 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-008"
+related_tils: []
+related_projects: []
+system_manifest: ""
+contributor_avatars:
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+external_links:
+  - name: "System Design Patterns you should Master right now : Piyush Garg"
+    url: "https://www.youtube.com/watch?v=OdNpY3WQniQ"
+---
+
+## Quick Overview
+
+This TIL captures five foundational system-design patterns I sketched while watching a short video and transcribing the Excalidraw notes: 1) Monolith vs Microservices, 2) Database-per-Service, 3) Cascading Failure & Circuit Breaker, 4) Event Sourcing, and 5) CQRS.
+
+![](/assets/diagrams/diagrams_sd_patterns.svg)
+
+## 1. Monolith vs Microservices
+
+- **What:** Trade-off between a single deployable application and a set of independently deployable services.
+- **Pros (Monolith):** Simple to develop, single server/process boundary, easy local debugging.
+- **Cons (Monolith):** Must scale whole app for one hot component; team velocity can be constrained.
+- **Pros (Microservices):** Different services scale independently, can use different stacks and DBs, failure is more contained.
+- **Challenges:** Service communication, distributed tracing, increased operational complexity.
+
+When choosing, weigh team size, operational maturity, and latency/cross-service transaction costs.
+
+## 2. Database per Service
+
+- **What:** Each microservice owns its own datastore and schema; services do not share a single database.
+- **When to use:** When strict service autonomy and independent scaling are primary goals.
+- **Caveats:** Application-level joins across services are expensive; design APIs for denormalized reads or use eventual consistency patterns.
+
+Decision flow (simplified):
+
+- If services need fast DB-level joins, a shared DB might be tempting — but it couples deployments.
+- Prefer grouping highly coupled components or use a shared read-side for queries.
+
+## 3. Cascading Failure & Circuit Breaker Pattern
+
+- **Problem:** A fault in one node can cascade, causing dependent nodes to overload and fail.
+- **Circuit Breaker:** A proxy/sidecar or library detects repeated failures and opens the circuit to stop requests, returning a fast failure or fallback until the downstream recovers.
+
+Pseudocode (conceptual):
+
+```text
+if failure_rate(service) > threshold:
+  open_circuit(service)
+  return fallback_response()
+else:
+  route_request()
+```
+
+- **Benefits:** Prevents overload, gives time for recovery, reduces error amplification in the system.
+
+## 4. Event Sourcing
+
+- **What:** Persist state changes as an immutable sequence of events instead of storing only the current state.
+- **Benefits:** Complete audit log, easy to rebuild state, great fit for domain-driven designs requiring history.
+- **Trade-offs:** Increased complexity for queries (need projections), eventual consistency, event versioning concerns.
+
+## 5. CQRS (Command Query Responsibility Segregation)
+
+- **What:** Separate write model (commands) from read model (queries). Often paired with Event Sourcing.
+- **Benefits:** Optimized models for reads and writes independently; read side can be denormalized for performance.
+- **Caveats:** Additional operational complexity keeping read projections up-to-date; handling eventual consistency in the UI.
+
+## Results / Personal Notes
+
+- These patterns are complementary: Event Sourcing + CQRS form a strong pair for write-heavy or audit-sensitive domains. Circuit breakers and DB-per-service help keep microservices robust and autonomous.
+- For small teams or early-stage projects, start with a modular monolith and extract services when you need independent scaling or clear ownership boundaries.
+
+---
+
+### 🧭 Connectivity Logic
+
+| Pattern | When to use | Result in system |
+| :--- | :--- | :--- |
+| Monolith | Small team, tight coupling | Fast iteration, simple ops |
+| Microservices | Independent scaling, large teams | Isolated failures, more infra |
+| DB-per-Service | Strong service ownership | Fewer cross-team DB conflicts |
+| Circuit Breaker | Unreliable downstreams | Limits blast radius |
+| Event Sourcing + CQRS | Audit, complex domain | Powerful auditing, projection needs |
+
+> System note: These are practical summaries — choose patterns that match team maturity and operational constraints.
