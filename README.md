@@ -16,6 +16,7 @@ The repo is structured around topic folders under `records/`, with supporting me
 | TIL-006 | Mastering the Model Context Protocol (MCP) | AI | [records/ai/model-context-protocol.qmd](records/ai/model-context-protocol.qmd) |
 | TIL-007 | From E-Waste to Private Cloud: The Triple-Threat Home Server Journey | Architecture | [records/architecture/personal-cloud-service.qmd](records/architecture/personal-cloud-service.qmd) |
 | TIL-008 | System Design Patterns — Quick Patterns Reference | Architecture | [records/architecture/system_design_patterns.qmd](records/architecture/system_design_patterns.qmd) |
+| TIL-009 | NumPy From Scratch: The Beginner-Friendly Mental Model I Wish I Had | AI | [records/ai/learning-numpy.qmd](records/ai/learning-numpy.qmd) |
 
 ## How The Repo Works
 

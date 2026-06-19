@@ -1,0 +1,498 @@
+---
+title: "NumPy From Scratch: The Beginner-Friendly Mental Model I Wish I Had"
+date: 2026-06-19
+category: "AI"
+tags: ["#numpy", "#python", "#arrays", "#data-science", "#machine-learning"]
+read_time: "12 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-009"
+related_tils: ["TIL-006"]
+related_projects: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars:
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+
+external_links:
+  - name: "NumPy User Guide"
+    url: "https://numpy.org/doc/stable/user/index.html"
+  - name: "NumPy Reference"
+    url: "https://numpy.org/doc/stable/reference/index.html"
+  - name: "NumPy Tutorial by FreeCodeCamp"
+    url: "https://youtu.be/QUT1VHiLmmI?si=e30VpBQvKVOaEx-y"
+  - name: "Collaborative NumPy Notebook"
+    url: "https://colab.research.google.com/drive/19AFgNMJdONhBwQL-ePAvUvYo0xsgYQEJ?usp=sharing"
+---
+
+## NumPy From Scratch
+
+I learned NumPy from a YouTube video and wrote this note while turning the rough notebook-style examples into something I could read as a short article. The goal here is not just to show syntax, but to build the mental model: NumPy is fast because it stores same-typed values in contiguous memory and gives you powerful array operations on top of that.
+
+If you are seeing NumPy for the first time, the easiest way to think about it is this: a NumPy array is a grid of values with a shape, a data type, and rules for how indexing and math work across dimensions.
+
+## Why NumPy Exists
+
+Python lists are great for general-purpose programming, but they are not ideal for heavy numerical work.
+
+- Lists can hold mixed data types.
+- NumPy arrays usually hold one data type.
+- Arrays are stored in a layout that makes them faster for math, slicing, and vectorized operations.
+- This is why NumPy is everywhere in data science, machine learning, image processing, plotting, and scientific computing.
+
+In practice, NumPy gives you three big wins:
+
+1. Faster numerical operations.
+2. Cleaner code for multi-dimensional data.
+3. A foundation that other libraries like Pandas and Matplotlib build on.
+
+## Getting Started
+
+Here is my collab notebook where I took notes on all of this: [NumPy Tutorial Notebook](https://colab.research.google.com/drive/19AFgNMJdONhBwQL-ePAvUvYo0xsgYQEJ?usp=sharing).
+Open that in a new tab to follow along with the code examples.
+
+The basic import is simple:
+
+```python
+import numpy as np
+```
+
+Once imported, `np.array(...)` becomes the main entry point for creating arrays.
+
+## NumPy Basics
+
+### Creating Arrays
+
+```python
+a = np.array([1, 2, 3], dtype='int16')
+b = np.array([[9.0, 8.0, 7.0], [6.0, 5.0, 4.0]])
+c = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]])
+```
+
+What matters here is not just the values, but the structure:
+
+- `a` is a 1D array.
+- `b` is a 2D array.
+- `c` is a 3D array.
+
+### Inspecting an Array
+
+These are the first properties I always check:
+
+```python
+print(a.ndim)
+print(a.shape)
+print(a.dtype)
+print(a.itemsize)
+print(a.size)
+```
+
+- `.ndim` tells you how many dimensions the array has.
+- `.shape` tells you the size of each dimension.
+- `.dtype` tells you the value type stored in memory.
+- `.itemsize` tells you how many bytes each item uses.
+- `.size` tells you the total number of elements.
+
+You can also compute the total storage size as `size * itemsize`.
+
+### Why Shape Matters
+
+Shape is the most important concept in NumPy. If you know the shape, you know how the array is laid out and what kinds of indexing, reshaping, and broadcasting make sense.
+
+For example:
+
+```python
+print(b.shape)
+print(c.shape)
+```
+
+Those shapes tell you exactly how many rows, columns, and nested blocks exist.
+
+## Accessing and Changing Values
+
+### A 2D Example
+
+```python
+a = np.array([
+		[1, 2, 3, 4, 5, 6, 7],
+		[8, 9, 10, 11, 12, 13, 14],
+		[15, 16, 17, 18, 19, 20, 21]
+])
+```
+
+With a 2D array, you access values using `[row, column]`.
+
+```python
+print(a[1, 5])
+print(a[1, -2])
+```
+
+Negative indexes work the same way they do in Python lists: `-1` means the last item, `-2` means the second last item, and so on.
+
+### Rows and Columns
+
+```python
+a[1]
+a[1, :]
+a[:, 3]
+```
+
+- `a[1]` gives the second row.
+- `a[1, :]` does the same thing explicitly.
+- `a[:, 3]` gives the fourth column.
+
+That colon syntax is one of the most useful parts of NumPy. It means “all values along this axis.”
+
+### Slicing With Steps
+
+You can slice arrays just like Python lists, but with multi-dimensional structure.
+
+```python
+a[0, 1:6:2]
+a[0, 5:0:-2]
+a[:, 5:0:-2]
+a[0:3:2, :]
+```
+
+Read the slice as `start:stop:step`.
+
+- `a[0, 1:6:2]` selects every second value from the first row.
+- `a[0, 5:0:-2]` walks backward through the first row.
+- `a[:, 5:0:-2]` applies the same idea to every row.
+- `a[0:3:2, :]` selects rows 0 and 2.
+
+## Changing Values
+
+Because NumPy arrays are mutable, you can replace values directly.
+
+```python
+a[0, 5:0:-2] = [29, 39, 49]
+a[1, [1, -1]] = 0
+```
+
+This is one of the practical strengths of NumPy: assign a scalar to fill multiple cells, or assign a list/array of matching shape.
+
+### A Subtle Indexing Rule
+
+This is the part that usually confuses people at first.
+
+- `a[[0, 2], [0, -1]] = -100` uses advanced indexing with two lists.
+- NumPy pairs the indexes element by element.
+- So it targets `(0, 0)` and `(2, -1)` only.
+
+If you want all four corners, use one of these forms:
+
+```python
+a[0:3:2, [0, -1]] = -50
+a[[0, 0, 2, 2], [0, -1, 0, -1]] = -100
+```
+
+The reason the slice-based version works differently is that NumPy applies the selected columns to each selected row.
+
+## 3D Arrays
+
+NumPy becomes even more useful when data has depth, such as images, batches, or stacked measurements.
+
+```python
+b = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+```
+
+Think “outside in”:
+
+```python
+print(b[0])
+print(b[0, 1])
+print(b[0, 1, 1])
+```
+
+- `b[0]` selects the first 2D block.
+- `b[0, 1]` selects the second row inside that block.
+- `b[0, 1, 1]` selects the final scalar value.
+
+You can also replace a slice across the 3D structure:
+
+```python
+b[:, 1, :] = [[9, 9], [8, 8]]
+```
+
+This updates the second row of each 2D block.
+
+## Creating Arrays Fast
+
+NumPy has several helper functions that are worth memorizing.
+
+### Zeros, Ones, Full, and Full-Like
+
+```python
+np.zeros((2, 3))
+np.zeros((2, 3, 3, 2))
+np.ones((4, 2, 2), dtype='int8')
+np.full((2, 4), 79, dtype='int32')
+np.full_like(a, 4)
+np.full(a.shape, 4)
+```
+
+- `zeros` is great for placeholders.
+- `ones` is useful for initialization.
+- `full` fills an array with the same value.
+- `full_like` uses another array’s shape as a template.
+
+One small gotcha from my notes: `np.full_like(a.shape, 4)` is not what you want, because `a.shape` is a tuple, not an array.
+
+### Random Arrays
+
+```python
+np.random.rand(4, 2)
+np.random.random_sample(a.shape)
+np.random.randint(7, size=(3, 3))
+np.random.randint(-2, 7, size=(3, 3))
+```
+
+- `rand` gives uniform random decimals in the shape you request.
+- `random_sample` is a similar alternative.
+- `randint` gives integers, with the upper bound excluded.
+
+### Identity and Repeat
+
+```python
+np.identity(5)
+
+arr = np.array([1, 2, 3])
+r1 = np.repeat(arr, 3)
+
+arr2 = np.array([[1, 2, 3]])
+r2 = np.repeat(arr2, 3, axis=0)
+r3 = np.repeat(arr2, 3, axis=1)
+```
+
+An identity matrix is the diagonal matrix with ones on the diagonal and zeros elsewhere. `repeat` is handy when you want to duplicate values or rows.
+
+## Building a Target Matrix
+
+This pattern is a great example of combining array creation and slicing.
+
+```python
+output = np.ones((5, 5))
+z = np.zeros((3, 3))
+z[1, 1] = 9
+output[1:-1, 1:-1] = z
+```
+
+The final matrix becomes:
+
+```text
+1 1 1 1 1
+1 0 0 0 1
+1 0 9 0 1
+1 0 0 0 1
+1 1 1 1 1
+```
+
+The key idea is that slicing lets you drop a smaller matrix into the center of a larger one.
+
+## Copying Arrays
+
+This is an important Python vs NumPy lesson.
+
+```python
+b = np.array([[100, 200, 300]])
+a = b
+a[0, 1] = 2
+c = b.copy()
+```
+
+- `a = b` does not create a new array.
+- Both names point to the same underlying data.
+- `copy()` creates a real independent copy.
+
+If you change one, the other only stays separate when you use `.copy()`.
+
+## Mathematics
+
+NumPy shines because arrays support element-wise math naturally.
+
+```python
+a = np.array([1, 2, 3, 4])
+
+print(a + 2)
+print(a - 2)
+print(a * 2)
+print(a / 2)
+print(a ** 2)
+```
+
+These operations apply to every element in the array.
+
+You can also combine arrays:
+
+```python
+b = np.array([1, 0, 1, 0])
+a + b
+```
+
+And NumPy gives you vectorized trigonometric functions too:
+
+```python
+np.sin(a)
+np.cos(a)
+```
+
+The big idea: you write math as math, not as loops.
+
+## Linear Algebra
+
+Linear algebra is one of NumPy’s strongest areas.
+
+```python
+a = np.ones((2, 3))
+b = np.full((3, 2), 2)
+np.matmul(a, b)
+
+c = np.identity(3)
+np.linalg.det(c)
+```
+
+- `matmul` performs matrix multiplication.
+- `linalg.det` calculates the determinant.
+
+This is why NumPy is so important for machine learning and scientific computing: a lot of that work boils down to linear algebra.
+
+## Statistics
+
+NumPy also gives you built-in statistical operations.
+
+```python
+stats = np.array([[1, 2, 3], [4, 5, 6]])
+
+np.min(stats)
+np.max(stats)
+np.min(stats, axis=1)
+np.sum(stats, axis=0)
+```
+
+- `np.min(stats)` finds the overall minimum.
+- `np.max(stats)` finds the overall maximum.
+- `axis=1` works across rows.
+- `axis=0` works across columns.
+
+If axes feel confusing, the simplest shortcut is: axis means the dimension you are collapsing.
+
+## Understanding Axes
+
+I used a 3D example to make axis behavior concrete:
+
+```python
+arr_3d = np.arange(24).reshape(2, 3, 4)
+
+np.sum(arr_3d, axis=0)
+np.sum(arr_3d, axis=1)
+np.sum(arr_3d, axis=2)
+```
+
+Here is the intuition:
+
+- `axis=0` collapses the first dimension, so the result keeps rows and columns.
+- `axis=1` collapses rows inside each block.
+- `axis=2` collapses columns inside each row.
+
+If you remember one thing, remember this: the axis you choose is the axis that disappears.
+
+## Reshaping and Reorganizing
+
+```python
+before = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
+after = before.reshape((8, 1))
+after1 = before.reshape((4, 2))
+after2 = before.reshape((2, 2, 2))
+```
+
+Reshaping changes the view of the same data without changing the values.
+
+The only rule is that the total number of elements must stay the same.
+
+## Stacking Arrays
+
+Sometimes you do not want to reshape - you want to combine arrays.
+
+```python
+v1 = np.array([1, 2, 3, 4])
+v2 = np.array([5, 6, 7, 8])
+np.vstack([v1, v2])
+np.vstack([v1, v2, v1])
+
+h1 = np.ones((2, 4))
+h2 = np.zeros((2, 2))
+np.hstack((h1, h2))
+```
+
+- `vstack` stacks arrays vertically.
+- `hstack` stacks arrays horizontally.
+
+These are extremely useful when you are building datasets from smaller pieces.
+
+## Loading Data From a File
+
+NumPy can read data directly from text files too.
+
+```python
+filedata = np.genfromtxt('data.txt', delimiter=',')
+filedata = filedata.astype('int32')
+```
+
+`genfromtxt` is helpful when your data is stored in a text file with separators such as commas.
+
+## Boolean Masking
+
+Boolean masks let you filter arrays by condition.
+
+```python
+filedata > 50
+filedata[filedata > 50]
+```
+
+This is one of the cleanest ways to pull out values that match a rule.
+
+You can also combine conditions:
+
+```python
+(~(filedata > 50) & (filedata < 100))
+```
+
+That expression means: values that are not greater than 50 and are still less than 100.
+
+## Advanced Indexing Practice
+
+I also practiced these array selection patterns:
+
+```python
+mat = np.arange(1, 31, 1).reshape(6, 5)
+
+mat[2:4, 0:2]
+mat[[0, 1, 2, 3], [1, 2, 3, 4]]
+mat[[0, 4, 5], 3:]
+```
+
+The key difference is:
+
+- Slicing returns blocks.
+- List-based indexing picks specific positions.
+- Mixed slicing and advanced indexing can behave differently depending on how the indexes pair.
+
+The exact results I wanted here were:
+
+- `[[11, 12], [16, 17]]`
+- `[2, 8, 14, 20]`
+- `[[4, 5], [24, 25], [29, 30]]`
+
+## Takeaways
+
+NumPy felt easier once I stopped thinking of arrays as “fancy lists” and started thinking of them as structured numeric grids.
+
+The most useful habits I took from this session are:
+
+- Check `shape`, `ndim`, and `dtype` early.
+- Learn slicing before memorizing advanced indexing.
+- Use vectorized math instead of loops.
+- Remember that `axis` is the dimension being reduced.
+- Use `.copy()` when you really want a separate array.
+
+If I had to summarize NumPy in one sentence, it would be this: NumPy gives Python a fast, expressive language for numerical data.
