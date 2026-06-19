@@ -1,7 +1,7 @@
 ---
 title: "Mastering the Model Context Protocol (MCP)"
 date: 2026-04-13
-category: "AI & LLM Architecture"
+category: "AI"
 tags: ["#mcp", "#llm", "#ai-architecture", "#agentic-workflows", "#sdk"]
 read_time: "8 min"
 # --- KNOWLEDGE GRAPH METADATA ---

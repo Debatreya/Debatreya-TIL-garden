@@ -1,7 +1,7 @@
 ---
 title: "NumPy From Scratch: The Beginner-Friendly Mental Model I Wish I Had"
 date: 2026-06-19
-category: "AI"
+category: "Machine Learning"
 tags: ["#numpy", "#python", "#arrays", "#data-science", "#machine-learning"]
 read_time: "12 min"
 # --- KNOWLEDGE GRAPH METADATA ---
