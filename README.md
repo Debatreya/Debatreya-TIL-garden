@@ -17,6 +17,7 @@ The repo is structured around topic folders under `records/`, with supporting me
 | TIL-007 | From E-Waste to Private Cloud: The Triple-Threat Home Server Journey | Architecture | [records/architecture/personal-cloud-service.qmd](records/architecture/personal-cloud-service.qmd) |
 | TIL-008 | System Design Patterns — Quick Patterns Reference | Architecture | [records/architecture/system_design_patterns.qmd](records/architecture/system_design_patterns.qmd) |
 | TIL-009 | NumPy From Scratch: The Beginner-Friendly Mental Model I Wish I Had | AI | [records/ai/learning-numpy.qmd](records/ai/learning-numpy.qmd) |
+| TIL-010 | Understanding the Open Graph Protocol and Dynamic Social Cards | Development | [records/development/open-graph-protocol.qmd](records/development/open-graph-protocol.qmd) |
 
 ## How The Repo Works
 

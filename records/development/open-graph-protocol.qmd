@@ -1,0 +1,81 @@
+---
+title: "Understanding the Open Graph Protocol and Dynamic Social Cards"
+date: 2026-06-20
+category: "Development"
+tags: ["#open-graph", "#metadata", "#social-cards", "#nextjs", "#seo"]
+read_time: "6 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-010"
+related_tils: []
+related_projects: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars:
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+---
+
+## Understanding the Open Graph Protocol and Dynamic Social Cards
+
+### The Context
+
+Have you ever pasted a link into WhatsApp, Twitter, or LinkedIn, and watched it expand into a preview card with a title, description, and thumbnail? That is the behavior I wanted to understand and reproduce for my own Developer OS portfolio.
+
+The secret sauce is the Open Graph Protocol.
+
+### What is the Open Graph Protocol?
+
+Originally created by Facebook in 2010, the Open Graph Protocol (OGP) is a standardized set of rules that transforms a standard webpage into a "rich object" within a social graph.
+
+Before OGP, social media scrapers had to guess what a webpage was about by reading the `<title>` and `<h1>` tags and picking an image from the DOM. OGP introduced a shared vocabulary that lets developers explicitly tell social platforms what data to display.
+
+Link to the official OGP documentation: https://ogp.me/
+
+### What Does It Do?
+
+OGP works through specific `<meta>` tags injected into the `<head>` of your HTML. When a social bot crawls your link, it looks for properties prefixed with `og:`.
+
+The core tags include:
+
+- `og:title` - The specific title of the page or post.
+- `og:description` - A short summary of the content.
+- `og:image` - The absolute URL of the thumbnail image.
+- `og:url` - The canonical URL of the page.
+
+When these tags are present, the social platform uses them to construct a social share card, or link preview.
+
+### The Impact
+
+Implementing Open Graph correctly is not just about vanity. It has a real impact on engagement:
+
+1. **Click-Through Rates (CTR):** A link with a relevant, custom thumbnail usually outperforms a generic logo and acts as a visual hook.
+2. **Professionalism and Trust:** A well-formatted preview card signals that the website is polished, modern, and trustworthy.
+3. **Context:** It gives the user immediate context about what they are about to read before they click.
+
+### How I Enabled It on debatreyadas.dev
+
+Because I built my portfolio as a Developer OS using Next.js with the App Router, I did not want to manually create static metadata and Photoshop thumbnails for every Today I Learned post. I needed a system that scaled automatically.
+
+#### 1. Dynamic Text Metadata
+
+Instead of relying on the root layout's fallback title, I used Next.js's `generateMetadata` API in my dynamic routes, like `/writing/til/[slug]`. Before the page renders, the server fetches the specific TIL document from MongoDB and dynamically injects the correct `og:title` and `og:description`.
+
+#### 2. The Game Changer: Dynamic OG Image Generation
+
+The real magic is the thumbnail. Instead of uploading static `.png` files, I built an API endpoint at `/api/og` using `next/og` and Vercel's **Satori** engine.
+
+Satori is an incredibly fast, lightweight layout engine that converts JSX and Tailwind directly into an SVG, which is then rasterized into a PNG on the Edge network.
+
+I set up the API route to accept search parameters, such as the post title, and return a custom-styled image that looks like a retro terminal or code editor, matching my Developer OS aesthetic.
+
+My dynamic route simply points its `og:image` tag to:
+
+`https://debatreyadas.dev/api/og?title=Mastering+the+Open+Graph+Protocol`
+
+The first time a social platform scrapes the link, the Edge function draws the image in milliseconds, caches it on the CDN, and serves a context-aware thumbnail.
+
+### Key Takeaways
+
+- Open Graph is what powers modern social link previews.
+- `generateMetadata` is the clean way to inject page-specific metadata in a Next.js App Router project.
+- Dynamic OG image generation with `next/og` and Satori removes the need for manually maintained social thumbnails.
+- A good preview card improves clarity, trust, and click-through rate.
