@@ -1,7 +1,7 @@
 ---
 title: "Pandas From Scratch: The Beginner-Friendly Mental Model I Wish I Had"
 date: 2026-06-20
-category: "AI"
+category: "Machine Learning"
 tags: ["#pandas", "#python", "#dataframe", "#data-science", "#machine-learning"]
 read_time: "14 min"
 # --- KNOWLEDGE GRAPH METADATA ---
