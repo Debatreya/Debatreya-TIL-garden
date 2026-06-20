@@ -1,0 +1,423 @@
+---
+title: "Pandas From Scratch: The Beginner-Friendly Mental Model I Wish I Had"
+date: 2026-06-20
+category: "AI"
+tags: ["#pandas", "#python", "#dataframe", "#data-science", "#machine-learning"]
+read_time: "14 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-011"
+related_tils: ["TIL-009", "TIL-006"]
+related_projects: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars:
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+
+external_links:
+  - name: "Pandas User Guide"
+    url: "https://pandas.pydata.org/docs/user_guide/index.html"
+  - name: "Pandas Reference"
+    url: "https://pandas.pydata.org/docs/reference/index.html"
+  - name: "Collaborative Pandas Notebook"
+    url: "https://colab.research.google.com/drive/1dFY5AigcEZ3gCsfcm1_22_s6qIFkHJT9?usp=sharing"
+---
+
+## Pandas From Scratch
+
+I learned Pandas from a YouTube video and turned my rough notebook notes into a short article I could actually reread. The goal here is not just to show syntax, but to build the mental model: Pandas is powerful because it gives structure, labels, and convenient operations on top of NumPy-backed data.
+
+If you are seeing Pandas for the first time, the easiest way to think about it is this: a Series is a labeled one-dimensional array, and a DataFrame is a labeled table made of multiple Series.
+
+## Why Pandas Exists
+
+NumPy is excellent for numerical arrays, but real-world data usually needs labels, tabular structure, and row/column-oriented operations.
+
+- Lists and raw arrays do not naturally carry column names.
+- Pandas adds meaningful indexes and labels.
+- Pandas makes filtering, selection, cleaning, and basic analysis much more readable.
+- This is why Pandas is one of the first tools people use in data science and machine learning workflows.
+
+In practice, Pandas gives you three big wins:
+
+1. Cleaner tabular data handling.
+2. Easier indexing and selection.
+3. A fast bridge between raw data and analysis.
+
+## Getting Started
+
+Here is my collab notebook where I took notes on all of this: [Pandas Tutorial Notebook](https://colab.research.google.com/drive/1dFY5AigcEZ3gCsfcm1_22_s6qIFkHJT9?usp=sharing).
+Open that in a new tab if you want to follow the notebook-style examples.
+
+The basic import is simple:
+
+```python
+import pandas as pd
+import numpy as np
+```
+
+Pandas is built on top of NumPy, so it often feels like a more labeled and structured layer over the same numerical foundation.
+
+## Pandas Basics
+
+### Series
+
+The simplest Pandas object is a Series. You can think of it as a labeled one-dimensional column.
+
+```python
+g7_pop = pd.Series([35.467, 63.951, 80.940, 60.665, 127.061, 64.511, 318.523])
+g7_pop.name = "G7 Population in Millions"
+```
+
+A Series has values, an index, and a name:
+
+- `.values` gives the underlying NumPy array.
+- `.index` stores the labels.
+- `.dtype` tells you the data type.
+
+You can assign your own labels to make the data easier to read:
+
+```python
+g7_pop.index = [
+		'Canada',
+		'France',
+		'Germany',
+		'Italy',
+		'Japan',
+		'United Kingdom',
+		'United States'
+]
+```
+
+That is the first major difference from a plain list: a Series is ordered, but it can also be explicitly labeled.
+
+### Creating Labeled Series
+
+You can build a Series from a dictionary or from a list plus an index.
+
+```python
+pd.Series({
+		'Canada': 35.467,
+		'France': 63.951,
+		'Germany': 80.94,
+		'Italy': 60.665,
+		'Japan': 127.061,
+		'United Kingdom': 64.511,
+		'United States': 318.523
+}, name='G7 Population in Millions')
+
+pd.Series(
+		[35.467, 63.951, 80.94, 60.665, 127.061, 64.511, 318.523],
+		index=['Canada', 'France', 'Germany', 'Italy', 'Japan', 'United Kingdom', 'United States'],
+		name='G7 Population in Millions'
+)
+```
+
+You can also reindex a Series to extract a subset of labeled values:
+
+```python
+pd.Series(g7_pop, index=['France', 'Germany', 'Italy', 'Spain'])
+```
+
+## Indexing and Selection
+
+### Basic Access
+
+Series support both positional access and label-based access.
+
+```python
+g7_pop[0]
+g7_pop.iloc[0]
+g7_pop.iloc[-1]
+g7_pop['Canada']
+```
+
+- Use normal numeric indexing when the Series still has the default index.
+- Use `.iloc` when you want positional access.
+- Use labels when the Series has meaningful index names.
+
+### Selecting Multiple Values
+
+```python
+g7_pop[['Italy', 'France']]
+g7_pop.iloc[[0, 3]]
+```
+
+### Slicing
+
+Series slicing is inclusive on the label side, which is different from plain Python lists.
+
+```python
+g7_pop['Canada' : 'Italy']
+g7_pop.iloc[0 : 3]
+```
+
+That inclusive behavior is one of the first things worth remembering because it can surprise people.
+
+### Conditional Selection
+
+Boolean filtering is one of the most useful Pandas patterns.
+
+```python
+g7_pop > 70
+g7_pop[g7_pop > 70]
+g7_pop[g7_pop > g7_pop.mean()]
+```
+
+You can combine conditions too:
+
+```python
+g7_pop[((g7_pop > 80) | (g7_pop < 40)) & ~(g7_pop > 100)]
+```
+
+The important idea is the same as in NumPy: build a boolean mask, then use it to keep the rows you want.
+
+### Vectorized Operations
+
+Series support vectorized math and NumPy functions:
+
+```python
+g7_pop * 1_000_000
+np.log(g7_pop)
+```
+
+Pandas keeps the convenience of NumPy while preserving labels.
+
+## DataFrames
+
+### Creating a DataFrame
+
+The most important Pandas structure is the DataFrame. It is a labeled table built from columns of data.
+
+```python
+df = pd.DataFrame({
+		'Population': [35.467, 63.951, 80.94, 60.665, 127.061, 64.511, 318.523],
+		'GDP': [1785387, 2833687, 3874437, 2167744, 4602367, 2950039, 17348075],
+		'Surface Area': [9984670, 640679, 357114, 301336, 377930, 242495, 9525067],
+		'HDI': [0.913, 0.888, 0.916, 0.873, 0.891, 0.907, 0.915],
+		'Continent': ['America', 'Europe', 'Europe', 'Europe', 'Asia', 'Europe', 'America']
+}, columns=['Population', 'GDP', 'Surface Area', 'HDI', 'Continent'])
+```
+
+After that, you can label the rows:
+
+```python
+df.index = [
+		'Canada',
+		'France',
+		'Germany',
+		'Italy',
+		'Japan',
+		'United Kingdom',
+		'United States',
+]
+```
+
+### DataFrame Properties
+
+These are the first properties I usually check:
+
+```python
+df.columns
+df.index
+df.info()
+df.size
+df.shape
+df.describe()
+df.dtypes
+df.dtypes.value_counts()
+```
+
+- `.columns` lists the column names.
+- `.index` lists the row labels.
+- `.info()` shows a compact summary.
+- `.shape` shows rows and columns.
+- `.describe()` gives a quick statistical overview.
+
+### Selecting Columns and Rows
+
+Single columns come back as a Series.
+
+```python
+df['Population']
+df['Population'].to_frame()
+```
+
+Multiple columns come back as a DataFrame.
+
+```python
+df[['Population', 'GDP']]
+```
+
+For row selection, `loc` and `iloc` are the safest tools.
+
+```python
+df.loc['Italy']
+df.loc['France': 'Italy']
+df.loc['France': 'Italy', 'Population']
+df.loc['France': 'Italy', ['Population', 'HDI']]
+
+df.iloc[-1]
+df.iloc[[0, 1, -1]]
+df.iloc[1:3]
+df.iloc[1:3, 3]
+df.iloc[1:3, [0, 3]]
+df.iloc[1:3, 1:3]
+```
+
+The key habit is simple: use `loc` for labels and `iloc` for integer positions.
+
+### Conditional Selection
+
+Boolean filtering works the same way it does for Series.
+
+```python
+df.loc[df['Population'] > 70]
+df.loc[df['Population'] > 70, 'Population' : 'HDI']
+```
+
+This becomes the normal way to isolate rows that meet a rule.
+
+## Modifying Data
+
+### Dropping Values
+
+You can remove rows or columns with `drop`.
+
+```python
+df.drop('Canada')
+df.drop(['Canada', 'Japan'])
+df.drop(columns=['Population', 'HDI'])
+df.drop(df.loc['Canada':'Japan'].index)
+```
+
+You can also be explicit about the axis:
+
+```python
+df.drop(['Population', 'HDI'], axis=0)
+df.drop(['Canada', 'Germany'], axis='rows')
+df.drop(['Canada', 'Germany'], axis=0)
+df.drop(['Population', 'HDI'], axis=1)
+```
+
+### Broadcasting and Arithmetic
+
+Operations with Series broadcast across rows or align by index.
+
+```python
+df[['Population', 'GDP']] / 100
+
+crisis = pd.Series([-1_000_000, -0.3], index=['GDP', 'HDI'])
+df[['GDP', 'HDI']] + crisis
+```
+
+This alignment behavior is one of the features that makes Pandas feel smart instead of just convenient.
+
+### Adding and Replacing Columns
+
+You can create a column from another Series:
+
+```python
+langs = pd.Series([
+		'French',
+		'German',
+		'Italian'
+], index=['France', 'Germany', 'Italy'], name='Language')
+
+df['Language'] = langs
+```
+
+Or replace values in a whole column:
+
+```python
+df['Language'] = 'English'
+```
+
+### Renaming Columns and Indexes
+
+Renaming returns a new DataFrame unless you assign it back.
+
+```python
+df.rename(
+		columns={
+				'HDI': 'Human Development Index',
+				'Annual Popcorn Consumption': 'APC'
+		},
+		index={
+				'United States': 'USA',
+				'United Kingdom': 'UK',
+				'Argentina': 'AR'
+		}
+)
+```
+
+You can also use functions:
+
+```python
+df.rename(index=str.upper)
+df.rename(index=lambda x: x.lower())
+```
+
+### Creating Derived Columns
+
+One of the most practical workflows is building new columns from existing ones.
+
+```python
+df['GDP Per Capita'] = df['GDP'] / df['Population']
+```
+
+That is a very common Pandas pattern in analysis work.
+
+## Quick Statistics
+
+Pandas makes it easy to summarize a Series or a DataFrame column.
+
+```python
+population = df['Population']
+population.quantile([.2, .4, .6, .8, 1])
+```
+
+Useful methods to remember:
+
+- `head()`
+- `describe()`
+- `max()`
+- `min()`
+- `sum()`
+- `mean()`
+- `std()`
+- `median()`
+- `quantile()`
+
+## Reading External Data
+
+Pandas is often used because it can load real data quickly.
+
+```python
+df = pd.read_csv('/content/sample_data/california_housing_test.csv')
+df.head()
+```
+
+Other common readers include:
+
+- `read_csv`
+- `read_html`
+- `read_sql`
+- `read_xml`
+
+There are also useful options like `header=None`, `parse_dates=True`, and `index_col=0` when the raw file needs extra shaping.
+
+## Takeaways
+
+Pandas started to make sense once I stopped thinking of it as just a better list library and started thinking of it as a labeled data system.
+
+The most useful habits I took from this session are:
+
+- Learn `Series` before trying to memorize every `DataFrame` trick.
+- Use `loc` and `iloc` instead of ambiguous slicing.
+- Treat boolean masks as your default filtering tool.
+- Remember that columns are often just Series.
+- Use broadcasting and alignment instead of writing manual loops.
+
+This note covers only the essential basics. Topics such as data preprocessing, aggregation, and merging DataFrames will be covered later as part of the classical machine learning learning path.
+
+If I had to summarize Pandas in one sentence, it would be this: Pandas gives Python a readable, label-aware way to work with tabular data.
