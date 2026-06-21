@@ -1,0 +1,475 @@
+---
+title: "Data Visualization From Scratch: The Beginner-Friendly Mental Model I Wish I Had"
+date: 2026-06-21
+category: "Machine Learning"
+tags: ["#matplotlib", "#seaborn", "#python", "#data-visualization", "#data-science", "#machine-learning"]
+read_time: "15 min"
+# --- KNOWLEDGE GRAPH METADATA ---
+id: "TIL-012"
+related_tils: ["TIL-009", "TIL-011"]
+related_projects: []
+system_manifest: "debatreyadas.dev-v1"
+contributor_avatars:
+  - name: "Debatreya Das"
+    avatar: "/avatars/debatreya.jpg"
+
+external_links:
+  - name: "Matplotlib Documentation"
+    url: "https://matplotlib.org/"
+  - name: "Seaborn Documentation"
+    url: "https://seaborn.pydata.org/"
+  - name: "Matplotlib Plot Types"
+    url: "https://matplotlib.org/stable/plot_types/index.html"
+  - name: "Matplotlib Axes API"
+    url: "https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html"
+  - name: "Seaborn Examples Gallery"
+    url: "https://seaborn.pydata.org/examples/index.html"
+---
+
+## Data Visualization From Scratch
+
+I learned data visualization from a YouTube video and turned my notebook-style notes into a short article I could actually reread. The goal here is not just to show plotting syntax, but to build the mental model: Matplotlib gives you the core plotting primitives, and Seaborn layers on top of that with cleaner defaults and higher-level statistical visuals. If you want the official references while reading, start with the [Matplotlib documentation](https://matplotlib.org/) and the [Seaborn documentation](https://seaborn.pydata.org/).
+
+If you are seeing this for the first time, the easiest way to think about it is this: plots are a way to turn numbers into shape, position, color, and comparison so the story in the data becomes visible.
+
+## Why Visualization Exists
+
+Raw numbers are hard to reason about when they start growing in size or dimensionality. Visualization exists because it helps you see patterns that are easy to miss in tables.
+
+- Line charts make sequences easier to read.
+- Scatter plots make relationships between two variables visible.
+- Histograms show distributions.
+- Bar charts make categorical comparisons simple.
+- Heatmaps and image plots help with matrix-like data.
+
+In practice, plotting gives you three big wins:
+
+1. Faster pattern recognition.
+2. Better communication.
+3. A more intuitive way to explore data before analysis.
+
+## Getting Started
+
+Here is the notebook I used while learning this topic:
+
+[Data Visualization Notebook](https://colab.research.google.com/drive/1bnKBijLKTXb0dKjRX5j6erX70e7iaisx?usp=sharing)
+
+Use it alongside this article if you want to follow the examples interactively.
+
+The basic imports are simple:
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+```
+
+Matplotlib is the lower-level plotting library that does the heavy lifting. Seaborn sits on top of it and makes many common charts easier to create and style.
+
+As a rule of thumb, each plot type answers a different question: line charts show change over time or sequence, scatter plots show relationships, histograms show distribution, bar charts show category comparisons, heatmaps show matrix-like patterns, and image plots show pixel-level structure.
+
+## Line Charts
+
+Line charts are one of the simplest and most widely used visualization techniques. They are good when you want to show values in sequence.
+
+Use a line chart when the x-axis has a natural order, especially for time series or other step-by-step measurements. It tells you whether the data is trending upward, trending downward, flattening out, or oscillating over the sequence.
+
+```python
+yield_apples = [0.895, 0.91, 0.919, 0.926, 0.931]
+
+plt.plot(yield_apples)
+```
+
+By default, Matplotlib uses the index position on the x-axis. You can make the plot more meaningful by supplying x-values:
+
+```python
+years = ["2010", "2011", "2012", "2013", "2014"]
+plt.plot(years, yield_apples)
+```
+
+Axis labels make the chart easier to read:
+
+```python
+plt.plot(years, yield_apples)
+plt.xlabel("Year")
+plt.ylabel("Yield (tons per hectare)")
+```
+
+### Plotting Multiple Lines
+
+```python
+years = range(2000, 2012)
+apples = [0.895, 0.91, 0.919, 0.926, 0.931, 0.934, 0.936, 0.937, 0.939, 0.94, 0.941, 0.943]
+oranges = [0.962, 0.941, 0.930, 0.923, 0.918, 0.908, 0.907, 0.904, 0.902, 0.897, 0.894, 0.885]
+
+plt.plot(years, apples)
+plt.plot(years, oranges)
+plt.xlabel("Year")
+plt.ylabel("Yield (tons per hectare)")
+```
+
+Adding a title and legend makes it much easier to tell the series apart:
+
+```python
+plt.plot(years, apples)
+plt.plot(years, oranges)
+plt.xlabel("Year")
+plt.ylabel("Yield (tons per hectare)")
+plt.title("Crop Yields in Kanto")
+plt.legend(["Apples", "Oranges"])
+```
+
+### Markers and Styling
+
+Markers help identify the exact data points on a line.
+
+```python
+plt.plot(years, apples, marker="o")
+plt.plot(years, oranges, marker="x")
+plt.xlabel("Year")
+plt.ylabel("Yield (tons per hectare)")
+plt.title("Crop Yields in Kanto")
+plt.legend(["Apples", "Oranges"])
+```
+
+Matplotlib also gives you lots of styling options:
+
+- `color` or `c`
+- `linestyle` or `ls`
+- `linewidth` or `lw`
+- `markersize` or `ms`
+- `markeredgecolor` or `mec`
+- `markeredgewidth` or `mew`
+- `markerfacecolor` or `mfc`
+- `alpha` for opacity
+
+The shorthand format string is also useful:
+
+```python
+plt.plot(years, apples, 's-b')
+plt.plot(years, oranges, 'o--r')
+```
+
+If no line style is specified, you only get markers:
+
+```python
+plt.plot(years, apples, 'sb')
+plt.plot(years, oranges, 'o--r')
+```
+
+### Figure Size and Style
+
+```python
+plt.figure(figsize=(2, 2))
+plt.plot(years, oranges, 'or')
+plt.title("Yeild of Oranges (tons per hectare)")
+```
+
+Seaborn can improve the default look of plots with a single style setting using [sns.set_style](https://seaborn.pydata.org/generated/seaborn.set_style.html):
+
+```python
+sns.set_style("whitegrid")
+```
+
+The notebook also demonstrates `darkgrid` as an alternate theme. These style choices are a quick way to make charts feel cleaner without changing the data. If you want to customize Matplotlib globally, the notebook’s `rcParams` section maps to the [Matplotlib configuration reference](https://matplotlib.org/stable/users/explain/configuration.html#matplotlib-configuration-rcparams).
+
+## Scatter Plots
+
+A scatter plot shows two variables as points on a 2D grid. It is useful when you want to inspect how two measurements vary together.
+
+Use a scatter plot when you want to check whether two variables move together, cluster into groups, or produce outliers. It tells you whether there is a relationship, a pattern, or just noisy spread.
+
+The iris flower dataset is a great example because it already contains multiple measurable features and species labels.
+
+```python
+flowers_df = sns.load_dataset("iris")
+```
+
+A plain line chart is not the right tool for this kind of data:
+
+```python
+plt.plot(flowers_df.sepal_length, flowers_df.sepal_width)
+```
+
+Instead, a scatter plot makes the structure easier to see:
+
+```python
+sns.scatterplot(data=flowers_df, x='sepal_length', y='sepal_width')
+```
+
+You can also color the points by category with `hue`:
+
+```python
+sns.scatterplot(data=flowers_df, x='sepal_length', y='sepal_width', hue='species', s=100)
+```
+
+This makes clusters and outliers much easier to notice.
+
+### Customizing Seaborn Figures
+
+Seaborn works well with Matplotlib figure sizing and titles:
+
+```python
+plt.figure(figsize=(12, 6))
+plt.title('Sepal Dimensions')
+
+sns.scatterplot(data=flowers_df, x='sepal_length', y='sepal_width', hue='species', s=100)
+plt.xlabel('Sepal Length (cm)')
+plt.ylabel('Sepal Width (cm)')
+```
+
+## Histograms
+
+A histogram shows the distribution of one variable by grouping values into bins.
+
+Use a histogram when you want to understand the shape of a single numeric feature. It tells you where the values are concentrated, how wide the spread is, and whether the data looks balanced or skewed.
+
+```python
+plt.title("Distribution of Sepal Width")
+plt.hist(flowers_df.sepal_width)
+plt.xlabel("Sepal Width (cm)")
+plt.ylabel("Counts")
+```
+
+The bin layout matters, so you can control it directly:
+
+```python
+plt.hist(flowers_df.sepal_width, bins=5)
+```
+
+You can also define the bin edges yourself:
+
+```python
+import numpy as np
+
+np.arange(2, 5, 0.5)
+plt.hist(flowers_df.sepal_width, bins=np.arange(2, 5, 0.5))
+```
+
+Unequal bins work too:
+
+```python
+plt.hist(flowers_df.sepal_width, bins=[1, 3, 4, 4.5])
+```
+
+### Multiple Histograms
+
+If you want to compare distributions across groups, you can overlay histograms with transparency:
+
+```python
+setosa_df = flowers_df[flowers_df.species == 'setosa']
+versicolor_df = flowers_df[flowers_df.species == 'versicolor']
+virginica_df = flowers_df[flowers_df.species == 'virginica']
+
+plt.hist(setosa_df.sepal_width, bins=np.arange(2, 5, 0.5), alpha=0.4)
+plt.hist(versicolor_df.sepal_width, bins=np.arange(2, 5, 0.5), alpha=0.4)
+plt.hist(virginica_df.sepal_width, bins=np.arange(2, 5, 0.5), alpha=0.4)
+plt.legend(['Setosa', 'Versicolor', 'Virginica'])
+plt.xlabel("Sepal Width (cm)")
+plt.ylabel("Counts")
+```
+
+You can also stack them:
+
+```python
+plt.title('Distribution of sepal Width')
+plt.hist(
+		[setosa_df.sepal_width, versicolor_df.sepal_width, virginica_df.sepal_width],
+		bins=np.arange(2, 5, 0.5),
+		label=['Setosa', 'Versicolor', 'Virginica'],
+		stacked=True
+)
+plt.legend()
+plt.xlabel("Sepal Width (cm)")
+plt.ylabel("Counts")
+```
+
+## Bar Charts
+
+Bar charts are similar to line charts, but each value is shown as a separate bar. They are useful for comparing categories or sequences.
+
+Use a bar chart when you want to compare discrete groups, counts, or aggregated values. It tells you which category is larger, smaller, or changing faster across a small set of named values.
+
+```python
+years = range(2000, 2006)
+apples = [0.35, 0.6, 0.9, 0.8, 0.65, 0.8]
+oranges = [0.4, 0.8, 0.9, 0.7, 0.6, 0.9]
+
+plt.bar(years, oranges)
+```
+
+You can combine bars with a line overlay:
+
+```python
+plt.bar(years, oranges)
+plt.plot(years, oranges, 'o--r')
+plt.title("Yield of Oranges")
+```
+
+Bars can also be stacked:
+
+```python
+plt.bar(years, apples)
+plt.bar(years, oranges, bottom=apples)
+plt.title("Yield of fruits")
+```
+
+### Bar Charts With Averages
+
+The tips dataset is useful when you want to see the average bill amount across days of the week.
+
+```python
+tips_df = sns.load_dataset("tips")
+bill_avg_df = tips_df.groupby('day')['total_bill'].agg(['mean', 'max', 'min'])
+```
+
+You can plot the summary values directly:
+
+```python
+plt.bar(bill_avg_df.index, bill_avg_df['mean'], alpha=0.4)
+plt.bar(bill_avg_df.index, bill_avg_df['max'], alpha=0.5)
+plt.bar(bill_avg_df.index, bill_avg_df['min'], alpha=0.5)
+```
+
+Seaborn also has a dedicated bar plot that computes averages automatically:
+
+```python
+sns.barplot(data=tips_df, x='day', y='total_bill')
+```
+
+You can add a third feature with `hue`, or switch the axes for horizontal bars:
+
+```python
+sns.barplot(x='day', y='total_bill', hue='smoker', data=tips_df)
+sns.barplot(x='total_bill', y='day', hue='sex', data=tips_df)
+```
+
+## Heatmaps
+
+Heatmaps are useful for 2D tables or matrices where color intensity communicates magnitude.
+
+Use a heatmap when you have two independent variables and one dependent variable, arranged like a table or matrix. It tells you where the values are strong, weak, or patterned across the grid, which is why the flights example works so well for month-by-year passenger counts.
+
+The flights dataset is a good example because it has month, year, and passenger count.
+
+```python
+flights_df = sns.load_dataset("flights")
+flight_pivot_df = sns.load_dataset("flights").pivot(index='month', columns='year', values='passengers')
+```
+
+The pivoted table can be rendered directly:
+
+```python
+plt.title("No. of Passengers (1000s)")
+sns.heatmap(flight_pivot_df)
+```
+
+You can also annotate the cells and change the color palette:
+
+```python
+plt.title("No. of Passengers (1000s)")
+sns.heatmap(flight_pivot_df, fmt="d", annot=True, cmap='Blues')
+```
+
+## Images
+
+Matplotlib can display images too.
+
+Use image plots when the data itself is visual, such as photos, diagrams, or pixel arrays. It tells you about spatial structure rather than numeric trends, which is why the notebook loads the transformer graphic and also crops part of the image.
+
+```python
+from urllib.request import urlretrieve
+
+urlretrieve('https://jalammar.github.io/images/xlnet/transformer-encoder-decoder.png', 'transformer.png')
+```
+
+Once the image is downloaded, it can be loaded with PIL and converted to a NumPy array:
+
+```python
+from PIL import Image
+
+img = Image.open('transformer.png')
+img_array = np.array(img)
+```
+
+The image data is just a 3D array of pixel intensities.
+
+```python
+plt.imshow(img)
+```
+
+You can hide the axes and crop a slice of the image:
+
+```python
+plt.grid(False)
+plt.title('Transformer Architecture')
+plt.axis('off')
+plt.imshow(img)
+
+plt.grid(False)
+plt.axis('off')
+plt.imshow(img_array[125:325, 105:305])
+```
+
+## Plotting Multiple Charts In A Grid
+
+One of the nicest Matplotlib features is `plt.subplots`, which gives you a grid of axes you can draw on individually. The [Matplotlib Axes API](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html) is the reference that becomes useful once you start working in subplot coordinates.
+
+Use subplots when you want to compare multiple charts in one figure or tell a small visual story with several related views. It tells you how different plot types support each other when they are shown side by side.
+
+```python
+fig, axes = plt.subplots(4, 3, figsize=(12, 10))
+```
+
+Then you can place different charts in different cells:
+
+```python
+axes[0,2].plot(years, oranges, 'o--r')
+axes[0,2].set_xlabel("Year")
+axes[0,2].set_ylabel("Yield (tons/hectare)")
+axes[0,2].set_title("Crop Yields")
+axes[0,2].legend(["Oranges"])
+
+axes[1,1].set_title('Sepal length vs. width')
+sns.scatterplot(data=flowers_df, x='sepal_length', y='sepal_width', hue='species', s=100, ax=axes[1,1])
+
+axes[0,0].set_title('Restaurant bills')
+sns.barplot(data=tips_df, x='day', y='total_bill', hue='sex', ax=axes[0,0])
+
+axes[2, 0].set_title('Flight traffic')
+sns.heatmap(flight_pivot_df, cmap='Blues', ax=axes[2,0])
+
+axes[3,2].set_title('Transformer Architecture')
+axes[3,2].grid(False)
+axes[3,2].axis('off')
+axes[3,2].imshow(img)
+
+plt.tight_layout(pad=1)
+```
+
+This is one of the most practical ways to combine multiple plot types in a single figure.
+
+## Takeaways
+
+Data visualization felt easier once I stopped treating it as random chart syntax and started thinking of it as a toolkit for showing structure in data.
+
+The most useful habits I took from this session are:
+
+- Start with line charts, scatter plots, and histograms before moving to more specialized visuals.
+- Use Matplotlib when you want control over the basics.
+- Use Seaborn when you want cleaner defaults and statistical plots.
+- Add titles, labels, and legends early.
+- Use subplots when you want multiple charts in one figure.
+
+If I had to summarize Matplotlib and Seaborn in one sentence, it would be this: Matplotlib gives Python the plotting engine, and Seaborn makes that engine easier to use for real-world data exploration.
+
+## References
+
+The source notebook touched a broad set of plotting capabilities, so these are the most relevant references to keep nearby:
+
+- [Matplotlib plot types index](https://matplotlib.org/stable/plot_types/index.html) for the full gallery of chart families
+- [Matplotlib configuration reference](https://matplotlib.org/stable/users/explain/configuration.html#matplotlib-configuration-rcparams) for `rcParams`
+- [Matplotlib Axes API](https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html) for subplot-based plotting
+- [Seaborn examples gallery](https://seaborn.pydata.org/examples/index.html) for higher-level chart ideas
+- [Seaborn `set_style`](https://seaborn.pydata.org/generated/seaborn.set_style.html) for chart theme control
+
+Those links line up with the notebook sections where the references first appeared, so each chart type can be traced back to the library feature that created it.

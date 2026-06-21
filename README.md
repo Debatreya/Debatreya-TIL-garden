@@ -19,6 +19,7 @@ The repo is structured around topic folders under `records/`, with supporting me
 | TIL-009 | NumPy From Scratch: The Beginner-Friendly Mental Model I Wish I Had | AI | [records/ai/learning-numpy.qmd](records/ai/learning-numpy.qmd) |
 | TIL-010 | Understanding the Open Graph Protocol and Dynamic Social Cards | Development | [records/development/open-graph-protocol.qmd](records/development/open-graph-protocol.qmd) |
 | TIL-011 | Pandas From Scratch: The Beginner-Friendly Mental Model I Wish I Had | AI | [records/ai/learning-pandas.qmd](records/ai/learning-pandas.qmd) |
+| TIL-012 | Data Visualization From Scratch: The Beginner-Friendly Mental Model I Wish I Had | AI | [records/ai/learning-data-visualization.qmd](records/ai/learning-data-visualization.qmd) |
 
 ## How The Repo Works
 
